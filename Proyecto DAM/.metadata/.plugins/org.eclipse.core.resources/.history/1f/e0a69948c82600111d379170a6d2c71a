@@ -1,0 +1,31 @@
+package dao;
+
+import conexionBD.ConexionBD;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DepartamentoDAO {
+	private static ConexionBD connBD;
+
+	public DepartamentoDAO(ConexionBD conexionBD) {
+		connBD = conexionBD;
+	}
+	
+	// Obtener todos los departamentos
+	public List<String> obtenerTodosNombres() {
+        List<String> departamentos = new ArrayList<>();
+        String sql = "select nombre_departamento from departamentos order by id_departamento";
+        try (Statement st = connBD.getConexion().createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                departamentos.add(rs.getString("nombre_departamento"));
+            }
+            connBD.cerrarConexion();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return departamentos;
+    }
+}

@@ -1,0 +1,172 @@
+package vista;
+
+import java.awt.EventQueue;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
+
+import dao.DepartamentoDAO;
+import dao.EmpleadoDAO;
+import modelo.Empleado;
+import conexionBD.ConexionBD;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+
+public class EmpleadoFrame extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private static ConexionBD conexionBD = new ConexionBD();
+	
+	private JTable table;
+    private DefaultTableModel model;
+    private JTextField txtBuscar;
+    private JComboBox<String> cbDepartamento;
+    private int pagina = 1;
+    private int filasPorPagina = 100;
+    private EmpleadoDAO empleadoDAO;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					// Conexión a BD
+                    conexionBD.MySql();
+                    EmpleadoDAO empleadoDAO = new EmpleadoDAO(conexionBD);
+					EmpleadoFrame frame = new EmpleadoFrame(empleadoDAO);
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	/**
+	 * Create the frame.
+	 */
+	public EmpleadoFrame(EmpleadoDAO empleadoDAO) {
+		this.empleadoDAO = empleadoDAO;
+		
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 1111, 743);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setLayout(new BorderLayout(5,5));
+		setContentPane(contentPane);
+		
+		initComponents();
+		cargarComboDepartamentos();
+        cargarTabla();
+	}
+	
+	// Inicializar tabla y filtros
+    private void initComponents() {
+        // Panel superior: filtros
+        JPanel panelFiltro = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        txtBuscar = new JTextField(20);
+        cbDepartamento = new JComboBox<>();
+        cbDepartamento.addItem("Todos los departamentos");
+        for (int i = 1; i <= 8; i++) {
+            cbDepartamento.addItem("Departamento " + i);
+        }
+        
+        JButton btnBuscar = new JButton("Buscar");
+        btnBuscar.addActionListener(e -> {
+            pagina = 1;
+            cargarTabla();
+        });
+        
+        panelFiltro.add(new JLabel("Buscar:"));
+        panelFiltro.add(txtBuscar);
+        panelFiltro.add(new JLabel("Departamento:"));
+        panelFiltro.add(cbDepartamento);
+        panelFiltro.add(btnBuscar);
+        
+        contentPane.add(panelFiltro, BorderLayout.NORTH);
+        
+        // Tabla
+        table = new JTable();
+        model = new DefaultTableModel();
+        String[] columnas = {
+        		"ID", "Nombre", "Apellido", "DNI",
+        		"Email", "Teléfono", "Salario",
+        		"Departamento", "Puesto", "Sede"};
+        model.setColumnIdentifiers(columnas);
+        table.setModel(model);
+        JScrollPane scrollPane = new JScrollPane(table);
+        contentPane.add(scrollPane, BorderLayout.CENTER);
+        
+        // Panel inferior: paginación
+        JPanel panelPaginacion = new JPanel();
+        JButton btnAnterior = new JButton("Anterior");
+        JButton btnSiguiente = new JButton("Siguiente");
+        JLabel lblPagina = new JLabel("Página: " + pagina);
+        
+        btnAnterior.addActionListener(e -> {
+            if (pagina > 1) {
+                pagina--;
+                cargarTabla();
+                lblPagina.setText("Página: " + pagina);
+            }
+        });
+        
+        btnSiguiente.addActionListener(e -> {
+            pagina++;
+            cargarTabla();
+            lblPagina.setText("Página: " + pagina);
+        });
+        
+        panelPaginacion.add(btnAnterior);
+        panelPaginacion.add(btnSiguiente);
+        panelPaginacion.add(lblPagina);
+        
+        contentPane.add(panelPaginacion, BorderLayout.SOUTH);
+    }
+    
+    // Cargar datos en la tabla
+    private void cargarTabla() {
+        model.setRowCount(0);
+        List<Empleado> empleados = empleadoDAO.obtenerTodos();
+        
+        String busqueda = txtBuscar.getText().trim().toLowerCase();
+        String depSeleccionado = cbDepartamento.getSelectedItem().toString();
+        
+        empleados.stream()
+        .filter(e -> (busqueda.isEmpty() ||
+                      e.getNombre().toLowerCase().contains(busqueda) ||
+                      e.getApellido().toLowerCase().contains(busqueda)))
+        .filter(e -> (depSeleccionado.equals("Todos los departamentos") ||
+        		e.getDepartamento().getNombreDepartamento().equals(depSeleccionado)))
+        .skip((pagina - 1) * filasPorPagina)
+        .limit(filasPorPagina)
+        .forEach(e -> model.addRow(new Object[]{
+                e.getIdEmpleado(),
+                e.getNombre(),
+                e.getApellido(),
+                e.getDni(),
+                e.getEmail(),
+                e.getTelefono(),
+                e.getSalario(),
+                e.getDepartamento().getNombreDepartamento(),
+                e.getPuesto().getNombrePuesto(),
+                e.getSede().getNombreSede()
+        }));
+    }
+    
+    private void cargarComboDepartamentos() {
+        cbDepartamento.removeAllItems();
+        cbDepartamento.addItem("Todos los departamentos");
+        DepartamentoDAO departamentoDAO = new DepartamentoDAO(conexionBD);
+        List<String> nombres = departamentoDAO.obtenerTodosNombres();
+        for (String nombre : nombres) {
+            cbDepartamento.addItem(nombre);
+        }
+    }
+}

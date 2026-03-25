@@ -1,0 +1,36 @@
+package dao;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import conexionBD.ConexionBD;
+import modelo.Sede;
+
+public class SedeDAO {
+	private static ConexionBD connBD;
+	
+	public SedeDAO(ConexionBD conexionBD) {
+		connBD = conexionBD;
+	}
+	
+	// Obtener todas las sedes
+	public List<Sede> obtenerTodos() {
+        List<Sede> lista = new ArrayList<>();
+        String sql = "select * from sedes";
+        try (Statement st = connBD.getConexion().createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+            while (rs.next()) {
+                Sede s = new Sede(
+                        rs.getInt("id_sede"),
+                        rs.getString("nombre_sede"),
+                        rs.getString("ciudad")
+                );
+                lista.add(s);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+}
