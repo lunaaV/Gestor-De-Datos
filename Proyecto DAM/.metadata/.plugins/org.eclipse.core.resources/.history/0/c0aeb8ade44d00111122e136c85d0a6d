@@ -1,0 +1,124 @@
+package panel;
+
+import java.awt.*;
+import javax.swing.*;
+import dao.RecuperarPasswordDAO;
+import conexionBD.ConexionBD;
+
+public class RecuperarPasswordPanel extends JPanel {
+	
+	private static final long serialVersionUID = 1L;
+	private static ConexionBD conexionBD = new ConexionBD();
+	private JTextField txtEmail;
+    private JPasswordField txtPass;
+    private JPasswordField txtConfirm;
+	
+	/**
+	 * Create the panel.
+	 */
+	public RecuperarPasswordPanel() {
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setBackground(new Color(30, 30, 45));
+        setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        
+        initComponents();
+	}
+	
+	private void initComponents() {
+		JLabel title = new JLabel("Recuperar contraseña");
+        title.setForeground(new Color(232, 233, 245));
+        title.setFont(new Font("SansSerif", Font.BOLD, 18));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        add(title);
+        add(Box.createRigidArea(new Dimension(0, 20)));
+        
+        JPanel panelEmail = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelEmail.setOpaque(false);
+        
+        JLabel lblEmail = new JLabel("Correo electrónico:");
+        lblEmail.setForeground(new Color(200, 202, 223));
+        lblEmail.setPreferredSize(new Dimension(150, 25));
+        
+        txtEmail = new JTextField(20);
+        
+        panelEmail.add(lblEmail);
+        panelEmail.add(txtEmail);
+        add(panelEmail);
+        add(Box.createRigidArea(new Dimension(0, 10)));
+        
+        JPanel panelPass = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelPass.setOpaque(false);
+        
+        JLabel lblPass = new JLabel("Nueva contraseña:");
+        lblPass.setForeground(new Color(200, 202, 223));
+        lblPass.setPreferredSize(new Dimension(150, 25));
+        
+        txtPass = new JPasswordField(20);
+        
+        panelPass.add(lblPass);
+        panelPass.add(txtPass);
+        add(panelPass);
+        add(Box.createRigidArea(new Dimension(0, 10)));
+        
+        JPanel panelConfirm = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelConfirm.setOpaque(false);
+        
+        JLabel lblConfirm = new JLabel("Confirmar contraseña:");
+        lblConfirm.setForeground(new Color(200, 202, 223));
+        lblConfirm.setPreferredSize(new Dimension(150, 25));
+        
+        txtConfirm = new JPasswordField(20);
+        
+        panelConfirm.add(lblConfirm);
+        panelConfirm.add(txtConfirm);
+        add(panelConfirm);
+        add(Box.createRigidArea(new Dimension(0, 20)));
+        
+        JButton btnCambiar = new JButton("Cambiar contraseña");
+        btnCambiar.setBackground(new Color(80, 70, 200));
+        btnCambiar.setForeground(Color.WHITE);
+        btnCambiar.setFont(new Font("SansSerif", Font.BOLD, 14));
+        btnCambiar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnCambiar.setFocusPainted(false);
+        
+        add(btnCambiar);
+        add(Box.createRigidArea(new Dimension(0, 10)));
+        
+        btnCambiar.addActionListener(e -> cambiarPassword());
+	}
+    
+	// ── LÓGICA ─────────────────────────────────────
+	private void cambiarPassword() {
+	    String email = txtEmail.getText().trim();
+	    String pass  = new String(txtPass.getPassword());
+	    String confirm = new String(txtConfirm.getPassword());
+	    
+	    String mensajeError = null;
+	    if (email.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
+            mensajeError = "Por favor, completa todos los campos";
+        } else if (!pass.equals(confirm)) {
+            mensajeError = "Las contraseñas no coinciden";
+        } else if (pass.length() < 4) {
+            mensajeError = "La contraseña debe tener al menos 4 caracteres";
+        } else {
+            RecuperarPasswordDAO dao = new RecuperarPasswordDAO(conexionBD);
+            
+            if (!dao.existeEmail(email)) {
+                mensajeError = "No existe un usuario con ese correo electrónico";
+            } else {
+                boolean actualizado = dao.actualizarPassword(email, pass);
+                if (actualizado) {
+                    JOptionPane.showMessageDialog(this, "¡Contraseña actualizada correctamente!",
+                    		                      "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                } else {
+                    mensajeError = "Error al actualizar la contraseña en la base de datos";
+                }
+            }
+        }
+        
+        if (mensajeError != null) {
+            JOptionPane.showMessageDialog(this, mensajeError, "Error", JOptionPane.ERROR_MESSAGE);
+        }
+	} 
+}

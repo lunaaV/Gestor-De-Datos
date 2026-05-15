@@ -1,0 +1,116 @@
+package vista.admin;
+
+import dao.*;
+import conexionBD.ConexionBD;
+import dao.EmpleadoDAO;
+import javax.swing.*;
+import javax.swing.table.*;
+import java.awt.*;
+
+public class ConsultarPanel extends JPanel {
+
+	private static final long serialVersionUID = 1L;
+    private JTable table;
+    private DefaultTableModel model;
+    private JTextField txtBuscar;
+    private JComboBox<String> cbDepartamento;
+    private JComboBox<String> cbPuesto;
+    private JComboBox<String> cbSede;
+    private EmpleadoDAO empleadoDAO;
+    private static ConexionBD conexionBD = new ConexionBD();
+    
+    /**
+	 * Create the panel.
+	 */
+    public ConsultarPanel(EmpleadoDAO empleadoDAO) {
+        this.empleadoDAO = empleadoDAO;
+        setLayout(new BorderLayout());
+        
+        initComponents();
+        cargarCombos();
+        cargarTabla();
+    }
+    
+    private void initComponents() {
+        // ── FILTROS ──
+        JPanel filtros = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 10));
+
+        txtBuscar = new JTextField(20);
+        txtBuscar.setToolTipText("Buscar por nombre, apellido o DNI...");
+
+        cbDepartamento = new JComboBox<>();
+        cbDepartamento.addItem("Todos los departamentos");
+
+        cbPuesto = new JComboBox<>();
+        cbPuesto.addItem("Todos los puestos");
+
+        cbSede = new JComboBox<>();
+        cbSede.addItem("Todas las sedes");
+
+        JButton btnBuscar = new JButton("Buscar");
+        btnBuscar.addActionListener(e -> cargarTabla());
+
+        filtros.add(new JLabel("Buscar:"));
+        filtros.add(txtBuscar);
+        filtros.add(new JLabel("Departamento:"));
+        filtros.add(cbDepartamento);
+        filtros.add(new JLabel("Puesto:"));
+        filtros.add(cbPuesto);
+        filtros.add(new JLabel("Sede:"));
+        filtros.add(cbSede);
+        filtros.add(btnBuscar);
+
+        // ── TABLA ──
+        model = new DefaultTableModel() {
+            @Override public boolean isCellEditable(int r, int c) {
+            	return false;
+            }
+        };
+        model.setColumnIdentifiers(new String[]{
+            "ID", "Nombre", "Apellido", "DNI",
+            "Email", "Teléfono", "Salario",
+            "Departamento", "Puesto", "Sede"});
+
+        table = new JTable(model);
+        JScrollPane scroll = new JScrollPane(table);
+
+        add(filtros, BorderLayout.NORTH);
+        add(scroll, BorderLayout.CENTER);
+    }
+
+    private void cargarTabla() {
+        model.setRowCount(0);
+        String busqueda = txtBuscar.getText().trim().toLowerCase();
+        String dep = cbDepartamento.getSelectedItem().toString();
+        String pue = cbPuesto.getSelectedItem().toString();
+        String sed = cbSede.getSelectedItem().toString();
+
+        empleadoDAO.obtenerTodos().stream()
+            .filter(e -> busqueda.isEmpty() ||
+                    e.getNombre().toLowerCase().contains(busqueda) ||
+                    e.getApellido().toLowerCase().contains(busqueda) ||
+                    e.getDni().toLowerCase().contains(busqueda))
+            .filter(e -> dep.equals("Todos los departamentos") ||
+                    e.getDepartamento().getNombreDepartamento().equals(dep))
+            .filter(e -> pue.equals("Todos los puestos") ||
+                    e.getPuesto().getNombrePuesto().equals(pue))
+            .filter(e -> sed.equals("Todas las sedes") ||
+                    e.getSede().getNombreSede().equals(sed))
+            .forEach(e -> model.addRow(new Object[]{
+                    e.getIdEmpleado(), e.getNombre(), e.getApellido(),
+                    e.getDni(), e.getEmail(), e.getTelefono(), e.getSalario(),
+                    e.getDepartamento().getNombreDepartamento(),
+                    e.getPuesto().getNombrePuesto(),
+                    e.getSede().getNombreSede()
+            }));
+    }
+
+    private void cargarCombos() {
+        new DepartamentoDAO(conexionBD).obtenerTodosNombres()
+                .forEach(cbDepartamento::addItem);
+        new PuestoDAO(conexionBD).obtenerTodos()
+                .forEach(p -> cbPuesto.addItem(p.getNombrePuesto()));
+        new SedeDAO(conexionBD).obtenerTodos()
+                .forEach(s -> cbSede.addItem(s.getNombreSede()));
+    }
+}

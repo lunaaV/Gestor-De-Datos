@@ -1,0 +1,54 @@
+package modelo;
+
+import java.util.Date;
+
+public class HistorialLaboral {
+	private int idHistorial;
+    private int idEmpleado;
+    private String puestoAnterior;
+    private String puestoNuevo;
+    private double salarioAnterior;
+    private double salarioNuevo;
+    private Date fechaCambio;
+    
+    public HistorialLaboral(int idHistorial, int idEmpleado, String puestoAnterior,
+            String puestoNuevo, double salarioAnterior, double salarioNuevo, Date fechaCambio) {
+        this.idHistorial = idHistorial;
+        this.idEmpleado = idEmpleado;
+        this.puestoAnterior = puestoAnterior;
+        this.puestoNuevo = puestoNuevo;
+        this.salarioAnterior = salarioAnterior;
+        this.salarioNuevo = salarioNuevo;
+        this.fechaCambio = fechaCambio;
+    }
+    
+    public int getIdHistorial() { return idHistorial; }
+    public int getIdEmpleado() { return idEmpleado; }
+    public String getPuestoAnterior() { return puestoAnterior; }
+    public String getPuestoNuevo() { return puestoNuevo; }
+    public double getSalarioAnterior() { return salarioAnterior; }
+    public double getSalarioNuevo() { return salarioNuevo; }
+    public Date getFechaCambio() { return fechaCambio; }
+    
+	public void setIdHistorial(int idHistorial) {
+		this.idHistorial = idHistorial;
+	}
+	public void setIdEmpleado(int idEmpleado) {
+		this.idEmpleado = idEmpleado;
+	}
+	public void setPuestoAnterior(String puestoAnterior) {
+		this.puestoAnterior = puestoAnterior;
+	}
+	public void setPuestoNuevo(String puestoNuevo) {
+		this.puestoNuevo = puestoNuevo;
+	}
+	public void setSalarioAnterior(double salarioAnterior) {
+		this.salarioAnterior = salarioAnterior;
+	}
+	public void setSalarioNuevo(double salarioNuevo) {
+		this.salarioNuevo = salarioNuevo;
+	}
+	public void setFechaCambio(Date fechaCambio) {
+		this.fechaCambio = fechaCambio;
+	}
+}

@@ -1,0 +1,81 @@
+package vista.admin;
+
+import dao.EmpleadoDAO;
+import modelo.Empleado;
+import javax.swing.*;
+import javax.swing.table.*;
+import java.awt.*;
+import java.util.List;
+
+public class EliminarPanel extends JPanel {
+
+	private static final long serialVersionUID = 1L;
+    private EmpleadoDAO empleadoDAO;
+
+    private JTable table;
+    private DefaultTableModel model;
+    private List<Empleado> listaEmpleados;
+
+	/**
+	 * Create the panel.
+	 */
+	public EliminarPanel(EmpleadoDAO empleadoDAO) {
+		this.empleadoDAO = empleadoDAO;
+        setLayout(new BorderLayout());
+        
+        initComponents();
+        cargarTabla();
+	}
+	
+	private void initComponents() {
+        model = new DefaultTableModel() {
+            @Override public boolean isCellEditable(int r, int c) {
+            	return false;
+            }
+        };
+        model.setColumnIdentifiers(new String[]{
+            "ID", "Nombre", "Apellido", "DNI",
+            "Departamento", "Puesto", "Sede"});
+
+        table = new JTable(model);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+        JButton btnEliminar = new JButton("Eliminar empleado seleccionado");
+        btnEliminar.addActionListener(e -> eliminar());
+
+        JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        bottom.add(btnEliminar);
+
+        add(new JScrollPane(table), BorderLayout.CENTER);
+        add(bottom, BorderLayout.SOUTH);
+    }
+
+    private void eliminar() {
+        int fila = table.getSelectedRow();
+        if (fila < 0) {
+            JOptionPane.showMessageDialog(this, "Selecciona un empleado primero.");
+            return;
+        }
+        Empleado e = listaEmpleados.get(fila);
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "¿Seguro que quieres eliminar a " + e.getNombre() + " " + e.getApellido() + "?",
+                "Confirmar eliminación", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            empleadoDAO.eliminarEmpleado(e.getIdEmpleado());
+            JOptionPane.showMessageDialog(this, "Empleado eliminado correctamente.");
+            cargarTabla();
+        }
+    }
+
+    private void cargarTabla() {
+        model.setRowCount(0);
+        listaEmpleados = empleadoDAO.obtenerTodos();
+        listaEmpleados.forEach(e -> model.addRow(new Object[]{
+                e.getIdEmpleado(), e.getNombre(), e.getApellido(), e.getDni(),
+                e.getDepartamento().getNombreDepartamento(),
+                e.getPuesto().getNombrePuesto(),
+                e.getSede().getNombreSede()
+        }));
+    }
+}

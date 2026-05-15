@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.sql.Date;
-
 import conexionBD.ConexionBD;
 import modelo.Departamento;
 import modelo.Empleado;
@@ -21,17 +20,16 @@ public class EmpleadoDAO {
 		connBD = conexionBD;
 	}
 	
-	// Obtener todos los empleados
-    public List<Empleado> obtenerTodos() {
+	public List<Empleado> obtenerTodos() {
         List<Empleado> empleados = new ArrayList<>();
-        String sql = "SELECT e.*, " +
+        String sql = "select e.*, " +
                 "d.nombre_departamento, d.descripcion AS desc_dep, " +
                 "p.nombre_puesto, p.descripcion AS desc_puesto, " +
                 "s.nombre_sede, s.ciudad " +
-                "FROM empleados e " +
-                "JOIN departamentos d ON e.id_departamento = d.id_departamento " +
-                "JOIN puestos p ON e.id_puesto = p.id_puesto " +
-                "JOIN sedes s ON e.id_sede = s.id_sede";
+                "from empleados e " +
+                "join departamentos d on e.id_departamento = d.id_departamento " +
+                "join puestos p on e.id_puesto = p.id_puesto " +
+                "join sedes s on e.id_sede = s.id_sede";
         try (Statement st = connBD.getConexion().createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
@@ -77,10 +75,9 @@ public class EmpleadoDAO {
         return empleados;
     }
     
-    // Insertar empleado
     public void insertarEmpleado(Empleado e) {
-        String sql = "INSERT INTO empleados(nombre, apellido, dni, email, telefono, fecha_nacimiento, fecha_contratacion, salario, id_departamento, id_puesto, id_sede, activo) "
-                   + "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "insert into empleados(nombre, apellido, dni, email, telefono, fecha_nacimiento, fecha_contratacion, salario, id_departamento, id_puesto, id_sede, activo) "
+                   + "values(?,?,?,?,?,?,?,?,?,?,?,?)";
         try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
             ps.setString(1, e.getNombre());
             ps.setString(2, e.getApellido());
@@ -98,6 +95,41 @@ public class EmpleadoDAO {
             System.out.println("Empleado insertado correctamente.");
         } catch (SQLException e1) {
             e1.printStackTrace();
+        }
+    }
+    
+    public void modificarEmpleado(Empleado e) {
+        String sql = "update empleados set nombre = ?, apellido = ?, dni = ?, email = ?, telefono = ?, " +
+                     "fecha_nacimiento = ?, fecha_contratacion = ?, salario = ?, " +
+                     "id_departamento = ?, id_puesto = ?, id_sede = ?, activo = ? " +
+                     "where id_empleado = ?";
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setString(1, e.getNombre());
+            ps.setString(2, e.getApellido());
+            ps.setString(3, e.getDni());
+            ps.setString(4, e.getEmail());
+            ps.setString(5, e.getTelefono());
+            ps.setDate(6, new Date(e.getFechaNacimiento().getTime()));
+            ps.setDate(7, new Date(e.getFechaContratacion().getTime()));
+            ps.setDouble(8, e.getSalario());
+            ps.setInt(9, e.getIdDepartamento());
+            ps.setInt(10, e.getIdPuesto());
+            ps.setInt(11, e.getIdSede());
+            ps.setBoolean(12, e.isActivo());
+            ps.setInt(13, e.getIdEmpleado());
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
+    
+    public void eliminarEmpleado(int idEmpleado) {
+        String sql = "delete from empleados where id_empleado = ?";
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
 }

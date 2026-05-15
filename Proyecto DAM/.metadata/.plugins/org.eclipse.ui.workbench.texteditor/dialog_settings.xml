@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item key="hasShownOverlayPopupBefore" value="true"/>
+	<item key="replaceBarOpen" value="false"/>
+	<list key="searchhistory">
+		<item value="leftPanel.setPreferredSize(new Dimension("/>
+		<item value="Datos"/>
+		<item value="JPanel card = new JPanel(new BorderLayout());"/>
+		<item value="Datos del Proyecto"/>
+		<item value="empleadoDAO"/>
+		<item value="crearBoton"/>
+		<item value="crear"/>
+		<item value="DEFA"/>
+		<item value="RoundedPanel"/>
+		<item value="setToolTipText"/>
+		<item value="txtBuscar"/>
+		<item value="btnX"/>
+		<item value="msgBox"/>
+		<item value="showMessageDialog"/>
+	</list>
+</section>

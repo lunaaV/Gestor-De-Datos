@@ -1,0 +1,208 @@
+package dialog;
+
+import javax.swing.*;
+import javax.swing.border.*;
+import java.awt.*;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
+public class DialogoErrorLogin extends JDialog {
+	private static final long serialVersionUID = 1L;
+	
+	private static final Color BG_PANEL     = new Color(37, 35, 72);
+    private static final Color HEADER_START = new Color(90, 79, 216);
+    private static final Color HEADER_END   = new Color(124, 110, 245);
+    private static final Color ACCENT       = new Color(108, 92, 231);
+    private static final Color ACCENT_HOVER = new Color(139, 126, 248);
+    private static final Color BORDER_OUTER = new Color(108, 92, 231);
+    private static final Color MSG_BOX_BG   = new Color(55, 50, 110);
+    private static final Color MSG_BOX_BOR  = new Color(90, 80, 180);
+    private static final Color TEXT_BODY    = new Color(200, 198, 240);
+    private static final Color TEXT_MUTED   = new Color(144, 140, 180);
+    private static final Color BADGE_BG     = new Color(45, 42, 90);
+    private static final Color BADGE_BOR    = new Color(80, 70, 160);
+    private static final Color BADGE_FG     = new Color(140, 125, 255);
+    
+    public DialogoErrorLogin(JFrame parent, String mensaje) {
+    	super(parent, true);
+        setUndecorated(true);
+        setSize(340, 210);
+        setLocationRelativeTo(null);
+        setBackground(new Color(0, 0, 0, 0));
+        
+        initComponents(mensaje);
+    }
+    
+    @SuppressWarnings("serial")
+	private void initComponents(String mensaje) {
+        RoundedPanel panel = new RoundedPanel(20, BG_PANEL, BORDER_OUTER);
+        panel.setLayout(new BorderLayout());
+        
+        // ── HEADER ───────────────────────────────────────────
+        JPanel header = new JPanel(null) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                GradientPaint gp = new GradientPaint(0, 0, HEADER_START, getWidth(), 0, HEADER_END);
+                g2.setPaint(gp);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight() + 20, 20, 20);
+                g2.dispose();
+            }
+        };
+        header.setPreferredSize(new Dimension(360, 62));
+        header.setOpaque(false);
+        
+        JLabel icon = new JLabel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(255, 255, 255, 38));
+                g2.fillOval(0, 0, getWidth() - 1, getHeight() - 1);
+                g2.setColor(Color.WHITE);
+                g2.setStroke(new BasicStroke(1.5f));
+                g2.drawOval(2, 2, getWidth() - 5, getHeight() - 5);
+                g2.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                int cx = getWidth() / 2;
+                g2.drawLine(cx, 8, cx, 18);
+                g2.fillOval(cx - 2, 23, 4, 4);
+                g2.dispose();
+            }
+            
+            @Override
+            public Dimension getPreferredSize() {
+            	return new Dimension(36, 36);
+            }
+        };
+        icon.setBounds(18, 13, 36, 36);
+        
+        JLabel lblTitulo = new JLabel("Error de autenticación");
+        lblTitulo.setFont(new Font("SansSerif", Font.BOLD, 14));
+        lblTitulo.setForeground(Color.WHITE);
+        lblTitulo.setBounds(64, 12, 240, 20);
+        
+        JLabel lblSub = new JLabel("Sistema de acceso · RH Suite");
+        lblSub.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        lblSub.setForeground(new Color(255, 255, 255, 165));
+        lblSub.setBounds(64, 32, 240, 16);
+        
+        header.add(icon);
+        header.add(lblTitulo);
+        header.add(lblSub);
+        
+        // ── CUERPO ────────────────────────────────────────────
+        JPanel body = new JPanel();
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        body.setOpaque(false);
+        body.setBorder(new EmptyBorder(16, 18, 18, 18));
+        
+        RoundedPanel msgBox = new RoundedPanel(10, MSG_BOX_BG, MSG_BOX_BOR);
+        msgBox.setLayout(new BorderLayout());
+        msgBox.setBorder(new EmptyBorder(10, 14, 10, 14));
+        msgBox.setAlignmentX(Component.LEFT_ALIGNMENT);
+        msgBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
+        
+        JTextArea txtMsg = new JTextArea(mensaje);
+        txtMsg.setEditable(false);
+        txtMsg.setOpaque(false);
+        txtMsg.setLineWrap(true);
+        txtMsg.setWrapStyleWord(true);
+        txtMsg.setForeground(TEXT_BODY);
+        txtMsg.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        txtMsg.setBorder(null);
+        msgBox.add(txtMsg, BorderLayout.CENTER);
+        
+        JPanel metaRow = new JPanel(new BorderLayout());
+        metaRow.setOpaque(false);
+        metaRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        metaRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+        metaRow.setBorder(new EmptyBorder(10, 0, 10, 0));
+        
+        RoundedPanel badgePanel = new RoundedPanel(10, BADGE_BG, BADGE_BOR);
+        badgePanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 4));
+        badgePanel.setBorder(new EmptyBorder(0, 10, 0, 10));
+        badgePanel.setPreferredSize(new Dimension(175, 24));
+        
+        JLabel badge = new JLabel("ERR_401 · UNAUTHORIZED");
+        badge.setFont(new Font("Monospaced", Font.PLAIN, 10));
+        badge.setForeground(BADGE_FG);
+        badge.setOpaque(false);
+        badgePanel.add(badge);
+        
+        String hora = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        JLabel lblHora = new JLabel(hora);
+        lblHora.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        lblHora.setForeground(TEXT_MUTED);
+        
+        metaRow.add(badgePanel, BorderLayout.WEST);
+        metaRow.add(lblHora, BorderLayout.EAST);
+        
+        JButton btnAceptar = new JButton("Entendido") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g;
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
+                Color colorInicio;
+                Color colorFin;
+                if (getModel().isRollover()) {
+                    colorInicio = ACCENT_HOVER;
+                    colorFin = new Color(155, 140, 255);
+                } else {
+                    colorInicio = ACCENT;
+                    colorFin = new Color(139, 126, 248);
+                }
+                GradientPaint gp = new GradientPaint(0, 0, colorInicio, getWidth(), 0, colorFin);
+                g2.setPaint(gp);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                super.paintComponent(g);
+            }
+        };
+        
+        btnAceptar.setForeground(Color.WHITE);
+        btnAceptar.setFont(new Font("SansSerif", Font.BOLD, 13));
+        btnAceptar.setFocusPainted(false);
+        btnAceptar.setBorderPainted(false);
+        btnAceptar.setContentAreaFilled(false);
+        btnAceptar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnAceptar.setBorder(new EmptyBorder(10, 0, 10, 0));
+        btnAceptar.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btnAceptar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        btnAceptar.addActionListener(e -> dispose());
+        
+        body.add(msgBox);
+        body.add(metaRow);
+        body.add(btnAceptar);
+        
+        panel.add(header, BorderLayout.NORTH);
+        panel.add(body, BorderLayout.CENTER);
+        setContentPane(panel);
+    }
+    
+    // ── PANEL REDONDEADO ─────────────────────────────────────────
+    @SuppressWarnings("serial")
+	static class RoundedPanel extends JPanel {
+        private final int radius;
+        private final Color bg, border;
+        RoundedPanel(int radius, Color bg, Color border) {
+            this.radius = radius;
+            this.bg = bg;
+            this.border = border;
+            setOpaque(false);
+        }
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(new Color(108, 92, 231, 50));
+            g2.fillRoundRect(4, 6, getWidth() - 8, getHeight() - 4, radius * 2, radius * 2);
+            g2.setColor(bg);
+            g2.fillRoundRect(0, 0, getWidth() - 1, getHeight() - 1, radius * 2, radius * 2);
+            g2.setColor(border);
+            g2.setStroke(new BasicStroke(1.2f));
+            g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, radius * 2, radius * 2);
+            g2.dispose();
+        }
+    }
+}

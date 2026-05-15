@@ -1,0 +1,73 @@
+package modelo;
+
+import java.util.Date;
+
+public class Usuario {
+	private int idUsuario;
+    private String nombre;
+    private String email;
+    private String password;
+    private int rol;
+    private String rolNombre;
+    private Date fechaCreacion;
+    private boolean activo;
+    
+    public Usuario(String nombre, String email, String password, int rol) {
+        this.nombre = nombre;
+        this.email = email;
+        this.password = password;
+        this.rol = rol;
+        this.fechaCreacion = new Date();
+        this.activo = true;
+    }
+
+	public int getIdUsuario() {
+		return idUsuario;
+	}
+	public String getNombre() {
+		return nombre;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public int getRol() {
+		return rol;
+	}
+	public String getRolNombre() {
+		return rolNombre;
+	}
+	public Date getFechaCreacion() {
+		return fechaCreacion;
+	}
+	public boolean isActivo() {
+		return activo;
+	}
+
+	public void setIdUsuario(int idUsuario) {
+		this.idUsuario = idUsuario;
+	}
+	public void setNombre(String nombre) {
+		this.nombre = nombre;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public void setRol(int rol) {
+		this.rol = rol;
+	}
+	public void setRolNombre(String rolNombre) {
+		this.rolNombre = rolNombre;
+	}
+	public void setFechaCreacion(Date fechaCreacion) {
+		this.fechaCreacion = fechaCreacion;
+	}
+	public void setActivo(boolean activo) {
+		this.activo = activo;
+	}
+}

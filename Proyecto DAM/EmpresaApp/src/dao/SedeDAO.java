@@ -3,7 +3,6 @@ package dao;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
 import conexionBD.ConexionBD;
 import modelo.Sede;
 
@@ -14,7 +13,6 @@ public class SedeDAO {
 		connBD = conexionBD;
 	}
 	
-	// Obtener todas las sedes
 	public List<Sede> obtenerTodos() {
         List<Sede> lista = new ArrayList<>();
         String sql = "select * from sedes";

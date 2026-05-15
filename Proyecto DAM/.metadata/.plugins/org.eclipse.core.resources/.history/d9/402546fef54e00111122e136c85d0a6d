@@ -1,0 +1,155 @@
+package dao;
+
+import modelo.EmpleadoProyecto;
+import modelo.Empleado;
+import modelo.Proyecto;
+import conexionBD.ConexionBD;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class EmpleadoProyectoDAO {
+    private static ConexionBD connBD;
+    
+    public EmpleadoProyectoDAO(ConexionBD conexionBD) {
+        connBD = conexionBD;
+    }
+    
+    // Obtener proyectos de un empleado específico
+    public List<Proyecto> obtenerProyectosPorEmpleado(int idEmpleado) {
+        List<Proyecto> proyectos = new ArrayList<>();
+        String sql = "SELECT p.* FROM proyectos p " +
+                     "INNER JOIN empleados_proyectos ep ON p.id_proyecto = ep.id_proyecto " +
+                     "WHERE ep.id_empleado = ? " +
+                     "ORDER BY p.fecha_inicio DESC";
+        
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                proyectos.add(new Proyecto(
+                    rs.getInt("id_proyecto"),
+                    rs.getString("nombre_proyecto"),
+                    rs.getString("descripcion"),
+                    rs.getDate("fecha_inicio"),
+                    rs.getDate("fecha_fin"),
+                    rs.getString("estado")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return proyectos;
+    }
+    
+    // Obtener empleados de un proyecto específico
+    public List<Empleado> obtenerEmpleadosPorProyecto(int idProyecto) {
+        List<Empleado> empleados = new ArrayList<>();
+        String sql = "SELECT e.* FROM empleados e " +
+                     "INNER JOIN empleados_proyectos ep ON e.id_empleado = ep.id_empleado " +
+                     "WHERE ep.id_proyecto = ?";
+        
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setInt(1, idProyecto);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                empleados.add(new Empleado(
+                    rs.getInt("id_empleado"),
+                    rs.getString("nombre"),
+                    rs.getString("apellido"),
+                    rs.getString("email"),
+                    rs.getString("puesto"),
+                    rs.getDate("fecha_contratacion"),
+                    rs.getDouble("salario")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return empleados;
+    }
+    
+    // Obtener detalles de la asignación (rol y horas)
+    public EmpleadoProyecto obtenerDetalleAsignacion(int idEmpleado, int idProyecto) {
+        String sql = "SELECT * FROM empleados_proyectos WHERE id_empleado = ? AND id_proyecto = ?";
+        
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            ps.setInt(2, idProyecto);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return new EmpleadoProyecto(
+                    rs.getInt("id_empleado"),
+                    rs.getInt("id_proyecto"),
+                    rs.getString("rol_proyecto"),
+                    rs.getInt("horas_asignadas")
+                );
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    
+    // Asignar empleado a proyecto
+    public void asignarEmpleadoAProyecto(int idEmpleado, int idProyecto, String rolProyecto, int horasAsignadas) {
+        String sql = "INSERT INTO empleados_proyectos (id_empleado, id_proyecto, rol_proyecto, horas_asignadas) " +
+                     "VALUES (?, ?, ?, ?)";
+        
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            ps.setInt(2, idProyecto);
+            ps.setString(3, rolProyecto);
+            ps.setInt(4, horasAsignadas);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // Actualizar asignación (rol y horas)
+    public void actualizarAsignacion(int idEmpleado, int idProyecto, String rolProyecto, int horasAsignadas) {
+        String sql = "UPDATE empleados_proyectos SET rol_proyecto = ?, horas_asignadas = ? " +
+                     "WHERE id_empleado = ? AND id_proyecto = ?";
+        
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setString(1, rolProyecto);
+            ps.setInt(2, horasAsignadas);
+            ps.setInt(3, idEmpleado);
+            ps.setInt(4, idProyecto);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // Remover empleado de proyecto
+    public void removerEmpleadoDeProyecto(int idEmpleado, int idProyecto) {
+        String sql = "DELETE FROM empleados_proyectos WHERE id_empleado = ? AND id_proyecto = ?";
+        
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            ps.setInt(2, idProyecto);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // Obtener total de horas asignadas a un empleado
+    public int getTotalHorasEmpleado(int idEmpleado) {
+        int totalHoras = 0;
+        String sql = "SELECT SUM(horas_asignadas) as total FROM empleados_proyectos WHERE id_empleado = ?";
+        
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setInt(1, idEmpleado);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                totalHoras = rs.getInt("total");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return totalHoras;
+    }
+}

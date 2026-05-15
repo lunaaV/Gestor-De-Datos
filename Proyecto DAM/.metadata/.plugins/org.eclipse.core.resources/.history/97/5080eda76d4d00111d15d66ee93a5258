@@ -1,0 +1,260 @@
+package vista.admin;
+
+import dao.UsuarioDAO;
+import modelo.Usuario;
+import conexionBD.ConexionBD;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.table.DefaultTableModel;
+import java.util.List;
+
+public class GestionUsuariosPanel extends JPanel {
+	
+	private static final long serialVersionUID = 1L;
+    private UsuarioDAO usuarioDAO;
+    
+    private JTextField txtNombre;
+    private JTextField txtEmail;
+    private JPasswordField txtPassword;
+    private JComboBox<String> cmbRol;
+    private JTable tablaUsuarios;
+    private DefaultTableModel modeloTabla;
+	/**
+	 * Create the panel.
+	 */
+	public GestionUsuariosPanel(ConexionBD conexionBD) {
+		this.usuarioDAO = new UsuarioDAO(conexionBD);
+        initComponents();
+        cargarUsuarios();
+	}
+	
+	private void initComponents() {
+        setLayout(new BorderLayout(10, 10));
+        setBorder(new EmptyBorder(20, 20, 20, 20));
+        setBackground(Color.WHITE);
+        
+        JPanel formularioPanel = crearFormularioPanel();
+        JPanel tablaPanel = crearTablaPanel();
+        
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, formularioPanel, tablaPanel);
+        splitPane.setResizeWeight(0.35);
+        splitPane.setDividerSize(5);
+        add(splitPane, BorderLayout.CENTER);
+    }
+    
+    private JPanel crearFormularioPanel() {
+        JPanel panelPrincipal = new JPanel(new BorderLayout());
+        panelPrincipal.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(100, 100, 200), 2),
+            "Registrar Nuevo Usuario",
+            TitledBorder.LEFT,
+            TitledBorder.TOP,
+            new Font("SansSerif", Font.BOLD, 14),
+            new Color(50, 50, 150)
+        ));
+        panelPrincipal.setBackground(Color.WHITE);
+        
+        JPanel panelCampos = new JPanel(new GridLayout(4, 2, 15, 15));
+        panelCampos.setBorder(new EmptyBorder(20, 50, 20, 50));
+        panelCampos.setBackground(Color.WHITE);
+        
+        JLabel lblNombre = new JLabel("Nombre:");
+        lblNombre.setFont(new Font("SansSerif", Font.BOLD, 12));
+        txtNombre = new JTextField(20);
+        txtNombre.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        panelCampos.add(lblNombre);
+        panelCampos.add(txtNombre);
+        
+        JLabel lblEmail = new JLabel("Email:");
+        lblEmail.setFont(new Font("SansSerif", Font.BOLD, 12));
+        txtEmail = new JTextField(20);
+        txtEmail.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        panelCampos.add(lblEmail);
+        panelCampos.add(txtEmail);
+        
+        JLabel lblPassword = new JLabel("Contraseña:");
+        lblPassword.setFont(new Font("SansSerif", Font.BOLD, 12));
+        txtPassword = new JPasswordField(20);
+        txtPassword.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        panelCampos.add(lblPassword);
+        panelCampos.add(txtPassword);
+        
+        JLabel lblRol = new JLabel("Rol:");
+        lblRol.setFont(new Font("SansSerif", Font.BOLD, 12));
+        cmbRol = new JComboBox<>(new String[]{"Usuario Estandar", "Administrador"});
+        cmbRol.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        panelCampos.add(lblRol);
+        panelCampos.add(cmbRol);
+        
+        JPanel botonesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
+        botonesPanel.setBackground(Color.WHITE);
+        
+        JButton btnRegistrar = crearBoton("Registrar Usuario", new Color(100, 200, 100));
+        btnRegistrar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                registrarUsuario();
+            }
+        });
+        
+        JButton btnLimpiar = crearBoton("Limpiar Campos", new Color(200, 200, 100));
+        btnLimpiar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                limpiarCampos();
+            }
+        });
+        
+        JButton btnRecargar = crearBoton("Recargar Lista", new Color(100, 100, 200));
+        btnRecargar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cargarUsuarios();
+            }
+        });
+        
+        botonesPanel.add(btnRegistrar);
+        botonesPanel.add(btnLimpiar);
+        botonesPanel.add(btnRecargar);
+        
+        panelPrincipal.add(panelCampos, BorderLayout.CENTER);
+        panelPrincipal.add(botonesPanel, BorderLayout.SOUTH);
+        
+        return panelPrincipal;
+    }
+    
+    @SuppressWarnings("serial")
+	private JPanel crearTablaPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(100, 100, 200), 2),
+            "Usuarios Registrados",
+            TitledBorder.LEFT,
+            TitledBorder.TOP,
+            new Font("SansSerif", Font.BOLD, 14),
+            new Color(50, 50, 150)
+        ));
+        panel.setBackground(Color.WHITE);
+        
+        String[] columnas = {"ID", "Nombre", "Email", "Rol", "Fecha Creación", "Activo"};
+        modeloTabla = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        
+        tablaUsuarios = new JTable(modeloTabla);
+        tablaUsuarios.setFont(new Font("SansSerif", Font.PLAIN, 11));
+        tablaUsuarios.getTableHeader().setFont(new Font("SansSerif", Font.BOLD, 12));
+        tablaUsuarios.setRowHeight(25);
+        tablaUsuarios.getTableHeader().setBackground(new Color(50, 50, 150));
+        tablaUsuarios.getTableHeader().setForeground(Color.WHITE);
+        
+        JScrollPane scrollPane = new JScrollPane(tablaUsuarios);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        panel.add(scrollPane, BorderLayout.CENTER);
+        
+        return panel;
+    }
+    
+    private JButton crearBoton(String texto, Color colorFondo) {
+        JButton boton = new JButton(texto);
+        boton.setBackground(colorFondo);
+        boton.setForeground(Color.WHITE);
+        boton.setFont(new Font("SansSerif", Font.BOLD, 12));
+        boton.setFocusPainted(false);
+        boton.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        return boton;
+    }
+    
+    private void registrarUsuario() {
+        if (txtNombre.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor ingrese el nombre del usuario", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (txtEmail.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor ingrese el email del usuario", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        String email = txtEmail.getText().trim();
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            JOptionPane.showMessageDialog(this, "Por favor ingrese un email válido", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        if (usuarioDAO.existeEmail(email)) {
+            JOptionPane.showMessageDialog(this, "El email ingresado ya está registrado", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        String password = new String(txtPassword.getPassword());
+        if (password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Por favor ingrese una contraseña", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        int rol = cmbRol.getSelectedIndex() == 0 ? 2 : 1;
+        
+        Usuario usuario = new Usuario(
+            txtNombre.getText().trim(),
+            email,
+            password,
+            rol
+        );
+        
+        if (usuarioDAO.insertarUsuario(usuario)) {
+            JOptionPane.showMessageDialog(this, "Usuario registrado exitosamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+            limpiarCampos();
+            cargarUsuarios();
+        } else {
+            JOptionPane.showMessageDialog(this, "Error al registrar el usuario", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    
+    private void limpiarCampos() {
+        txtNombre.setText("");
+        txtEmail.setText("");
+        txtPassword.setText("");
+        cmbRol.setSelectedIndex(0);
+        txtNombre.requestFocus();
+    }
+    
+    private void cargarUsuarios() {
+        modeloTabla.setRowCount(0);
+        
+        List<Usuario> lista = usuarioDAO.listarUsuarios();
+        for (int i = 0; i < lista.size(); i++) {
+            Usuario usuario = lista.get(i);
+            String activo;
+
+            if (usuario.isActivo()) activo = "Sí";
+            else activo = "No";
+            
+            String[] fila = new String[6];
+            fila[0] = String.valueOf(usuario.getIdUsuario());
+            fila[1] = usuario.getNombre();
+            fila[2] = usuario.getEmail();
+            fila[3] = usuario.getRolNombre();
+            fila[4] = String.valueOf(usuario.getFechaCreacion());
+            fila[5] = activo;
+            
+            modeloTabla.addRow(fila);
+        }
+        
+        tablaUsuarios.getColumnModel().getColumn(0).setPreferredWidth(40);
+        tablaUsuarios.getColumnModel().getColumn(1).setPreferredWidth(150);
+        tablaUsuarios.getColumnModel().getColumn(2).setPreferredWidth(200);
+        tablaUsuarios.getColumnModel().getColumn(3).setPreferredWidth(100);
+        tablaUsuarios.getColumnModel().getColumn(4).setPreferredWidth(100);
+        tablaUsuarios.getColumnModel().getColumn(5).setPreferredWidth(60);
+    }
+}

@@ -1,0 +1,39 @@
+package dao;
+
+import java.sql.*;
+import conexionBD.ConexionBD;
+
+public class RecuperarPasswordDAO {
+	private final ConexionBD conexionBD;
+	
+    public RecuperarPasswordDAO(ConexionBD conexionBD) {
+        this.conexionBD = conexionBD;
+    }
+    
+    public boolean existeEmail(String email) {
+        String sql = "select 1 from usuarios where email = ? and activo = true";
+        try (Connection con = conexionBD.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    public boolean actualizarPassword(String email, String nuevaPassword) {
+        String sql = "UPDATE usuarios SET password = ? WHERE email = ?";
+        try (Connection con = conexionBD.getConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, nuevaPassword);
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+}

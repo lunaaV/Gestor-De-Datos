@@ -1,0 +1,268 @@
+package vista.admin;
+
+import dao.*;
+import modelo.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.table.*;
+import java.awt.*;
+import java.util.List;
+
+public class ProyectosEmpleadoPanel extends JPanel {
+    private EmpleadoDAO empleadoDAO;
+    private ProyectoDAO proyectoDAO;
+    private EmpleadoProyectoDAO relacionDAO;
+    
+    private JComboBox<Empleado> cbEmpleados;
+    private JTable tablaProyectos;
+    private DefaultTableModel modeloTabla;
+    private JLabel lblTitulo;
+    private JButton btnAsignar, btnRemover, btnRefrescar;
+    
+    private final Color COLOR_FONDO = new Color(240, 248, 255);
+    private final Color COLOR_BOTON = new Color(70, 130, 200);
+    private final Color COLOR_BOTON_HOVER = new Color(100, 160, 230);
+    private final Color COLOR_TABLA_HEADER = new Color(70, 130, 200);
+    private final Font FUENTE_TITULO = new Font("Segoe UI", Font.BOLD, 18);
+    private final Font FUENTE_NORMAL = new Font("Segoe UI", Font.PLAIN, 12);
+    
+    public ProyectosEmpleadoPanel(EmpleadoDAO empleadoDAO, ProyectoDAO proyectoDAO, EmpleadoProyectoDAO relacionDAO) {
+        this.empleadoDAO = empleadoDAO;
+        this.proyectoDAO = proyectoDAO;
+        this.relacionDAO = relacionDAO;
+        
+        initComponents();
+        cargarEmpleados();
+    }
+    
+    private void initComponents() {
+        setLayout(new BorderLayout(10, 10));
+        setBackground(COLOR_FONDO);
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        JPanel panelSuperior = new JPanel(new BorderLayout(10, 10));
+        panelSuperior.setBackground(COLOR_FONDO);
+        panelSuperior.setBorder(BorderFactory.createCompoundBorder(
+            new LineBorder(new Color(200, 200, 200), 1),
+            new EmptyBorder(15, 15, 15, 15)
+        ));
+        
+        lblTitulo = new JLabel("Proyectos por Empleado");
+        lblTitulo.setFont(FUENTE_TITULO);
+        lblTitulo.setForeground(COLOR_BOTON);
+        panelSuperior.add(lblTitulo, BorderLayout.NORTH);
+        
+        JPanel panelSeleccion = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+        panelSeleccion.setBackground(COLOR_FONDO);
+        
+        JLabel lblEmpleado = new JLabel("Seleccionar Empleado:");
+        lblEmpleado.setFont(FUENTE_NORMAL);
+        
+        cbEmpleados = new JComboBox<>();
+        cbEmpleados.setFont(FUENTE_NORMAL);
+        cbEmpleados.setPreferredSize(new Dimension(250, 30));
+        cbEmpleados.addActionListener(e -> cargarProyectosDelEmpleado());
+        
+        btnRefrescar = crearBoton("Refrescar", "refresh.png");
+        btnRefrescar.addActionListener(e -> cargarEmpleados());
+        
+        panelSeleccion.add(lblEmpleado);
+        panelSeleccion.add(cbEmpleados);
+        panelSeleccion.add(btnRefrescar);
+        
+        panelSuperior.add(panelSeleccion, BorderLayout.CENTER);
+        
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        panelBotones.setBackground(COLOR_FONDO);
+        
+        btnAsignar = crearBoton("Asignar Proyecto", "add.png");
+        btnRemover = crearBoton("Remover Proyecto", "remove.png");
+        
+        btnAsignar.addActionListener(e -> asignarProyecto());
+        btnRemover.addActionListener(e -> removerProyecto());
+        
+        panelBotones.add(btnAsignar);
+        panelBotones.add(btnRemover);
+        panelSuperior.add(panelBotones, BorderLayout.SOUTH);
+        
+        add(panelSuperior, BorderLayout.NORTH);
+        
+        String[] columnas = {"ID", "Nombre del Proyecto", "Descripción", "Fecha Inicio", "Fecha Fin", "Estado"};
+        modeloTabla = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        
+        tablaProyectos = new JTable(modeloTabla);
+        tablaProyectos.setFont(FUENTE_NORMAL);
+        tablaProyectos.setRowHeight(25);
+        tablaProyectos.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        tablaProyectos.getTableHeader().setBackground(COLOR_TABLA_HEADER);
+        tablaProyectos.getTableHeader().setForeground(Color.WHITE);
+        tablaProyectos.setSelectionBackground(new Color(200, 220, 240));
+        
+        tablaProyectos.getColumnModel().getColumn(0).setPreferredWidth(50);
+        tablaProyectos.getColumnModel().getColumn(1).setPreferredWidth(200);
+        tablaProyectos.getColumnModel().getColumn(2).setPreferredWidth(300);
+        tablaProyectos.getColumnModel().getColumn(3).setPreferredWidth(100);
+        tablaProyectos.getColumnModel().getColumn(4).setPreferredWidth(100);
+        tablaProyectos.getColumnModel().getColumn(5).setPreferredWidth(100);
+        
+        JScrollPane scrollPane = new JScrollPane(tablaProyectos);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+        
+        add(scrollPane, BorderLayout.CENTER);
+        
+        JPanel panelInfo = new JPanel();
+        panelInfo.setBackground(COLOR_FONDO);
+        panelInfo.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+        
+        JLabel lblInfo = new JLabel("Seleccione un empleado para ver sus proyectos asignados");
+        lblInfo.setFont(new Font("Segoe UI", Font.ITALIC, 11));
+        lblInfo.setForeground(Color.GRAY);
+        panelInfo.add(lblInfo);
+        
+        add(panelInfo, BorderLayout.SOUTH);
+    }
+    
+    private JButton crearBoton(String texto, String iconoPath) {
+        JButton boton = new JButton(texto);
+        boton.setFont(FUENTE_NORMAL);
+        boton.setBackground(COLOR_BOTON);
+        boton.setForeground(Color.WHITE);
+        boton.setFocusPainted(false);
+        boton.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        boton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                boton.setBackground(COLOR_BOTON_HOVER);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                boton.setBackground(COLOR_BOTON);
+            }
+        });
+        return boton;
+    }
+    
+    @SuppressWarnings("serial")
+	private void cargarEmpleados() {
+        cbEmpleados.removeAllItems();
+        List<Empleado> empleados = empleadoDAO.obtenerTodos();
+        for (Empleado emp : empleados) {
+            cbEmpleados.addItem(emp);
+        }
+        
+        cbEmpleados.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value instanceof Empleado) {
+                    Empleado emp = (Empleado) value;
+                    value = emp.getNombre() + " " + emp.getApellido();
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+    }
+    
+    private void cargarProyectosDelEmpleado() {
+        modeloTabla.setRowCount(0);
+        Empleado empleadoSeleccionado = (Empleado) cbEmpleados.getSelectedItem();
+        if (empleadoSeleccionado != null) {
+            List<Proyecto> proyectos = relacionDAO.obtenerProyectosPorEmpleado(empleadoSeleccionado.getIdEmpleado());
+            
+            for (Proyecto proyecto : proyectos) {
+                Object[] fila = {
+                    proyecto.getIdProyecto(),
+                    proyecto.getNombreProyecto(),
+                    proyecto.getDescripcion(),
+                    proyecto.getFechaInicio(),
+                    proyecto.getFechaFin(),
+                    proyecto.getEstado()
+                };
+                modeloTabla.addRow(fila);
+            }
+            if (proyectos.isEmpty()) {
+                JOptionPane.showMessageDialog(this, 
+                    "Este empleado no tiene proyectos asignados.", 
+                    "Información", 
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+    }
+    
+    private void asignarProyecto() {
+        Empleado empleado = (Empleado) cbEmpleados.getSelectedItem();
+        if (empleado == null) {
+            JOptionPane.showMessageDialog(this, "Seleccione un empleado primero.");
+            return;
+        }
+        
+        List<Proyecto> todosProyectos = proyectoDAO.obtenerTodos();
+        List<Proyecto> proyectosActuales = relacionDAO.obtenerProyectosPorEmpleado(empleado.getIdEmpleado());
+        
+        List<Proyecto> proyectosDisponibles = new ArrayList<>();
+        for (Proyecto p : todosProyectos) {
+            boolean yaAsignado = false;
+            for (Proyecto pa : proyectosActuales) {
+                if (pa.getIdProyecto() == p.getIdProyecto()) {
+                    yaAsignado = true;
+                    break;
+                }
+            }
+            if (!yaAsignado) {
+                proyectosDisponibles.add(p);
+            }
+        }
+        
+        if (proyectosDisponibles.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "No hay proyectos disponibles para asignar.");
+            return;
+        }
+        
+        Proyecto proyectoSeleccionado = (Proyecto) JOptionPane.showInputDialog(
+            this,
+            "Seleccione el proyecto a asignar:",
+            "Asignar Proyecto",
+            JOptionPane.QUESTION_MESSAGE,
+            null,
+            proyectosDisponibles.toArray(),
+            proyectosDisponibles.get(0)
+        );
+        
+        if (proyectoSeleccionado != null) {
+            String rol = JOptionPane.showInputDialog(this, "Ingrese el rol del empleado en este proyecto:");
+            if (rol != null && !rol.trim().isEmpty()) {
+                relacionDAO.asignarEmpleadoAProyecto(empleado.getIdEmpleado(), 
+                                                     proyectoSeleccionado.getIdProyecto(), 
+                                                     rol);
+                cargarProyectosDelEmpleado();
+                JOptionPane.showMessageDialog(this, "Proyecto asignado exitosamente.");
+            }
+        }
+    }
+    
+    private void removerProyecto() {
+        int filaSeleccionada = tablaProyectos.getSelectedRow();
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un proyecto para remover.");
+            return;
+        }
+        
+        Empleado empleado = (Empleado) cbEmpleados.getSelectedItem();
+        int idProyecto = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
+        String nombreProyecto = (String) modeloTabla.getValueAt(filaSeleccionada, 1);
+        
+        int confirmacion = JOptionPane.showConfirmDialog(this,
+            "¿Está seguro de remover el proyecto '" + nombreProyecto + "' del empleado?",
+            "Confirmar remoción",
+            JOptionPane.YES_NO_OPTION);
+            
+        if (confirmacion == JOptionPane.YES_OPTION) {
+            relacionDAO.removerEmpleadoDeProyecto(empleado.getIdEmpleado(), idProyecto);
+            cargarProyectosDelEmpleado();
+            JOptionPane.showMessageDialog(this, "Proyecto removido exitosamente.");
+        }
+    }
+}

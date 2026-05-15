@@ -1,0 +1,129 @@
+package panel;
+
+import java.awt.*;
+import javax.swing.*;
+import dao.RecuperarPasswordDAO;
+import conexionBD.ConexionBD;
+
+public class RecuperarPasswordPanel extends JPanel {
+
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Create the panel.
+	 */
+	public RecuperarPasswordPanel(ConexionBD conexionBD) {
+        setLayout(new GridBagLayout());
+        setBackground(new Color(30, 30, 45));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(6, 6, 6, 6);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
+
+        JLabel title = new JLabel("Recuperar contraseña", SwingConstants.CENTER);
+        title.setForeground(new Color(232, 233, 245));
+        title.setFont(new Font("SansSerif", Font.BOLD, 14));
+        add(title, gbc);
+
+        gbc.gridwidth = 1; gbc.gridy++;
+        JLabel lblEmail = new JLabel("Correo:");
+        lblEmail.setForeground(new Color(200, 202, 223));
+        add(lblEmail, gbc);
+
+        gbc.gridx = 1;
+        JTextField txtEmail = new JTextField(18);
+        add(txtEmail, gbc);
+
+        gbc.gridx = 0; gbc.gridy++;
+        JLabel lblPass = new JLabel("Nueva contraseña:");
+        lblPass.setForeground(new Color(200, 202, 223));
+        add(lblPass, gbc);
+
+        gbc.gridx = 1;
+        JPasswordField txtPass = new JPasswordField(18);
+        add(txtPass, gbc);
+
+        gbc.gridx = 0; gbc.gridy++;
+        JLabel lblPass2 = new JLabel("Confirmar:");
+        lblPass2.setForeground(new Color(200, 202, 223));
+        add(lblPass2, gbc);
+
+        gbc.gridx = 1;
+        JPasswordField txtPass2 = new JPasswordField(18);
+        add(txtPass2, gbc);
+
+        gbc.gridx = 0; gbc.gridy++; gbc.gridwidth = 2;
+        JButton btn = new JButton("Cambiar contraseña");
+        btn.setBackground(new Color(80, 70, 200));
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        add(btn, gbc);
+
+        // ---------- Lógica ----------
+        RecuperarPasswordDAO dao = new RecuperarPasswordDAO(conexionBD);
+
+        btn.addActionListener(e -> {
+
+            String email = txtEmail.getText().trim();
+            String pass  = new String(txtPass.getPassword());
+            String pass2 = new String(txtPass2.getPassword());
+
+            String estado;
+
+            if (email.isEmpty() || pass.isEmpty() || pass2.isEmpty()) {
+                estado = "CAMPOS_VACIOS";
+            } else if (!pass.equals(pass2)) {
+                estado = "NO_COINCIDEN";
+            } else if (pass.length() < 4) {
+                estado = "PASS_CORTA";
+            } else if (!dao.existeEmail(email)) {
+                estado = "EMAIL_NO_EXISTE";
+            } else if (dao.actualizarPassword(email, pass)) {
+                estado = "OK";
+            } else {
+                estado = "ERROR_BBDD";
+            }
+
+            String mensaje;
+            int tipo = JOptionPane.WARNING_MESSAGE;
+            boolean cerrar = false;
+
+            switch (estado) {
+                case "CAMPOS_VACIOS":
+                    mensaje = "Rellena todos los campos.";
+                    break;
+                case "NO_COINCIDEN":
+                    mensaje = "Las contraseñas no coinciden.";
+                    break;
+                case "PASS_CORTA":
+                    mensaje = "La contraseña debe tener al menos 4 caracteres.";
+                    break;
+                case "EMAIL_NO_EXISTE":
+                    mensaje = "No existe ningún usuario con ese correo.";
+                    break;
+                case "OK":
+                    mensaje = "Contraseña actualizada correctamente.";
+                    tipo = JOptionPane.INFORMATION_MESSAGE;
+                    cerrar = true;
+                    break;
+                case "ERROR_BBDD":
+                    mensaje = "Error al actualizar la contraseña.";
+                    tipo = JOptionPane.ERROR_MESSAGE;
+                    break;
+                default:
+                    mensaje = "Estado desconocido.";
+                    tipo = JOptionPane.ERROR_MESSAGE;
+            }
+
+            JOptionPane.showMessageDialog(this, mensaje, "Recuperar contraseña", tipo);
+
+            if (cerrar) {
+                // Si el panel está dentro de una ventana, la cerramos
+                Window w = SwingUtilities.getWindowAncestor(this);
+                if (w != null) w.dispose();
+            }
+        });
+	}
+}

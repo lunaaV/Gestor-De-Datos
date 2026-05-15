@@ -1,6 +1,7 @@
 package dao;
 
 import conexionBD.ConexionBD;
+import modelo.Departamento;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,14 +14,17 @@ public class DepartamentoDAO {
 		connBD = conexionBD;
 	}
 	
-	// Obtener todos los departamentos
-	public List<String> obtenerTodosNombres() {
-        List<String> departamentos = new ArrayList<>();
-        String sql = "select nombre_departamento from departamentos order by id_departamento";
+	public List<Departamento> obtenerTodos() {
+        List<Departamento> departamentos = new ArrayList<>();
+        String sql = "SELECT id_departamento, nombre_departamento, descripcion FROM departamentos ORDER BY id_departamento";
         try (Statement st = connBD.getConexion().createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
-                departamentos.add(rs.getString("nombre_departamento"));
+                departamentos.add(new Departamento(
+                        rs.getInt("id_departamento"),
+                        rs.getString("nombre_departamento"),
+                        rs.getString("descripcion")
+                ));
             }
         } catch (SQLException e) {
             e.printStackTrace();

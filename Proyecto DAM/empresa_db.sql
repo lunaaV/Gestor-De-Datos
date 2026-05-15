@@ -127,6 +127,10 @@ INSERT IGNORE INTO roles (nombre_rol, descripcion) VALUES
 ('ADMIN','Administrador del sistema'),
 ('USER','Usuario normal');
 
+INSERT INTO usuarios (nombre, email, password, rol, fecha_creacion) VALUES
+('Administrador', 'admin@empresa.com', 'admin123', 1, CURDATE()),
+('Usuario Normal', 'user@empresa.com', 'user123', 2, CURDATE());
+
 INSERT IGNORE INTO departamentos (nombre_departamento) VALUES
 ('IT'),
 ('Recursos Humanos'),

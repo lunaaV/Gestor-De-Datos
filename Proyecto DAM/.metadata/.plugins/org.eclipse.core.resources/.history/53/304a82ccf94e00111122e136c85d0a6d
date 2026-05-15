@@ -1,0 +1,298 @@
+package vista.admin;
+
+import dao.ProyectoDAO;
+import conexionBD.ConexionBD;
+import modelo.Proyecto;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+public class ProyectosPanel extends JPanel {
+    private ProyectoDAO proyectoDAO;
+    private JTable tablaProyectos;
+    private DefaultTableModel modeloTabla;
+    private JTextField txtNombre, txtDescripcion;
+    private JComboBox<String> cbEstado;
+    private JSpinner spinnerFechaInicio, spinnerFechaFin;
+    private JButton btnNuevo, btnGuardar, btnModificar, btnEliminar, btnCancelar;
+    private int idSeleccionado = -1;
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+    public ProyectosPanel(ConexionBD conexionBD) {
+        this.proyectoDAO = new ProyectoDAO(conexionBD);
+        initComponents();
+        cargarDatos();
+    }
+
+    private void initComponents() {
+        setLayout(new BorderLayout(10, 10));
+        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Panel de formulario
+        JPanel panelFormulario = crearPanelFormulario();
+        
+        // Panel de tabla
+        JPanel panelTabla = crearPanelTabla();
+        
+        // Panel de botones
+        JPanel panelBotones = crearPanelBotones();
+
+        add(panelFormulario, BorderLayout.NORTH);
+        add(panelTabla, BorderLayout.CENTER);
+        add(panelBotones, BorderLayout.SOUTH);
+    }
+
+    private JPanel crearPanelFormulario() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(Color.BLUE), 
+            "Datos del Proyecto", 
+            TitledBorder.LEFT, 
+            TitledBorder.TOP
+        ));
+        
+        // Panel para los campos
+        JPanel panelCampos = new JPanel(new GridLayout(4, 2, 10, 10));
+        panelCampos.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        // Crear componentes
+        txtNombre = new JTextField(20);
+        txtDescripcion = new JTextField(20);
+        
+        spinnerFechaInicio = new JSpinner(new SpinnerDateModel());
+        spinnerFechaInicio.setEditor(new JSpinner.DateEditor(spinnerFechaInicio, "yyyy-MM-dd"));
+        
+        spinnerFechaFin = new JSpinner(new SpinnerDateModel());
+        spinnerFechaFin.setEditor(new JSpinner.DateEditor(spinnerFechaFin, "yyyy-MM-dd"));
+        
+        cbEstado = new JComboBox<>(new String[]{"Pendiente", "En Progreso", "Completado", "Cancelado"});
+        
+        // Agregar al grid
+        panelCampos.add(new JLabel("Nombre:"));
+        panelCampos.add(txtNombre);
+        panelCampos.add(new JLabel("Descripción:"));
+        panelCampos.add(txtDescripcion);
+        panelCampos.add(new JLabel("Fecha Inicio:"));
+        panelCampos.add(spinnerFechaInicio);
+        panelCampos.add(new JLabel("Fecha Fin:"));
+        panelCampos.add(spinnerFechaFin);
+        
+        // Panel para estado
+        JPanel panelEstado = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelEstado.add(new JLabel("Estado:"));
+        panelEstado.add(cbEstado);
+        
+        panel.add(panelCampos, BorderLayout.CENTER);
+        panel.add(panelEstado, BorderLayout.SOUTH);
+        
+        return panel;
+    }
+
+    @SuppressWarnings("serial")
+	private JPanel crearPanelTabla() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Lista de Proyectos"));
+
+        // Crear modelo de tabla
+        String[] columnas = {"ID", "Nombre", "Descripción", "Fecha Inicio", "Fecha Fin", "Estado"};
+        modeloTabla = new DefaultTableModel(columnas, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        
+        tablaProyectos = new JTable(modeloTabla);
+        tablaProyectos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tablaProyectos.getTableHeader().setReorderingAllowed(false);
+        
+        // Ajustar ancho de columnas
+        tablaProyectos.getColumnModel().getColumn(0).setMaxWidth(50);
+        tablaProyectos.getColumnModel().getColumn(1).setPreferredWidth(150);
+        tablaProyectos.getColumnModel().getColumn(2).setPreferredWidth(200);
+        
+        // Agregar scroll
+        JScrollPane scrollPane = new JScrollPane(tablaProyectos);
+        panel.add(scrollPane, BorderLayout.CENTER);
+        
+        // Evento de selección
+        tablaProyectos.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int fila = tablaProyectos.getSelectedRow();
+                if (fila >= 0) {
+                    cargarDatosFormulario(fila);
+                }
+            }
+        });
+        
+        return panel;
+    }
+
+    private JPanel crearPanelBotones() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        
+        btnNuevo = new JButton("Nuevo");
+        btnGuardar = new JButton("Guardar");
+        btnModificar = new JButton("Modificar");
+        btnEliminar = new JButton("Eliminar");
+        btnCancelar = new JButton("Cancelar");
+        
+        // Estilos de botones
+        btnNuevo.setBackground(new Color(0, 153, 204));
+        btnNuevo.setForeground(Color.WHITE);
+        btnGuardar.setBackground(new Color(51, 153, 51));
+        btnGuardar.setForeground(Color.WHITE);
+        btnModificar.setBackground(new Color(255, 153, 0));
+        btnModificar.setForeground(Color.WHITE);
+        btnEliminar.setBackground(new Color(204, 0, 0));
+        btnEliminar.setForeground(Color.WHITE);
+        
+        panel.add(btnNuevo);
+        panel.add(btnGuardar);
+        panel.add(btnModificar);
+        panel.add(btnEliminar);
+        panel.add(btnCancelar);
+        
+        // Eventos de botones
+        btnNuevo.addActionListener(e -> limpiarFormulario());
+        btnGuardar.addActionListener(e -> guardarProyecto());
+        btnModificar.addActionListener(e -> modificarProyecto());
+        btnEliminar.addActionListener(e -> eliminarProyecto());
+        btnCancelar.addActionListener(e -> limpiarFormulario());
+        
+        return panel;
+    }
+
+    private void cargarDatos() {
+        modeloTabla.setRowCount(0);
+        List<Proyecto> proyectos = proyectoDAO.obtenerTodos();
+        
+        for (Proyecto p : proyectos) {
+            modeloTabla.addRow(new Object[]{
+                p.getIdProyecto(),
+                p.getNombreProyecto(),
+                p.getDescripcion(),
+                sdf.format(p.getFechaInicio()),
+                sdf.format(p.getFechaFin()),
+                p.getEstado()
+            });
+        }
+    }
+
+    private void cargarDatosFormulario(int fila) {
+        idSeleccionado = (int) modeloTabla.getValueAt(fila, 0);
+        txtNombre.setText((String) modeloTabla.getValueAt(fila, 1));
+        txtDescripcion.setText((String) modeloTabla.getValueAt(fila, 2));
+        
+        try {
+            Date fechaInicio = sdf.parse((String) modeloTabla.getValueAt(fila, 3));
+            Date fechaFin = sdf.parse((String) modeloTabla.getValueAt(fila, 4));
+            spinnerFechaInicio.setValue(fechaInicio);
+            spinnerFechaFin.setValue(fechaFin);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        cbEstado.setSelectedItem(modeloTabla.getValueAt(fila, 5));
+    }
+
+    private void limpiarFormulario() {
+        idSeleccionado = -1;
+        txtNombre.setText("");
+        txtDescripcion.setText("");
+        spinnerFechaInicio.setValue(new Date());
+        spinnerFechaFin.setValue(new Date());
+        cbEstado.setSelectedIndex(0);
+        tablaProyectos.clearSelection();
+    }
+
+    private void guardarProyecto() {
+        if (validarCampos()) {
+            Proyecto proyecto = new Proyecto(
+                0,
+                txtNombre.getText(),
+                txtDescripcion.getText(),
+                (Date) spinnerFechaInicio.getValue(),
+                (Date) spinnerFechaFin.getValue(),
+                (String) cbEstado.getSelectedItem()
+            );
+            
+            proyectoDAO.insertar(proyecto);
+            JOptionPane.showMessageDialog(this, "Proyecto guardado correctamente");
+            cargarDatos();
+            limpiarFormulario();
+        }
+    }
+
+    private void modificarProyecto() {
+        if (idSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un proyecto para modificar", 
+                                        "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        if (validarCampos()) {
+            Proyecto proyecto = new Proyecto(
+                idSeleccionado,
+                txtNombre.getText(),
+                txtDescripcion.getText(),
+                (Date) spinnerFechaInicio.getValue(),
+                (Date) spinnerFechaFin.getValue(),
+                (String) cbEstado.getSelectedItem()
+            );
+            
+            proyectoDAO.modificar(proyecto);
+            JOptionPane.showMessageDialog(this, "Proyecto modificado correctamente");
+            cargarDatos();
+            limpiarFormulario();
+        }
+    }
+
+    private void eliminarProyecto() {
+        if (idSeleccionado == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un proyecto para eliminar", 
+                                        "Advertencia", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        int confirm = JOptionPane.showConfirmDialog(this, 
+            "¿Está seguro de eliminar este proyecto?", 
+            "Confirmar eliminación", 
+            JOptionPane.YES_NO_OPTION);
+            
+        if (confirm == JOptionPane.YES_OPTION) {
+            proyectoDAO.eliminar(idSeleccionado);
+            JOptionPane.showMessageDialog(this, "Proyecto eliminado correctamente");
+            cargarDatos();
+            limpiarFormulario();
+        }
+    }
+
+    private boolean validarCampos() {
+        if (txtNombre.getText().trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "El nombre del proyecto es obligatorio", 
+                                        "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        
+        Date fechaInicio = (Date) spinnerFechaInicio.getValue();
+        Date fechaFin = (Date) spinnerFechaFin.getValue();
+        
+        if (fechaFin.before(fechaInicio)) {
+            JOptionPane.showMessageDialog(this, "La fecha de fin no puede ser anterior a la fecha de inicio", 
+                                        "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        
+        return true;
+    }
+}

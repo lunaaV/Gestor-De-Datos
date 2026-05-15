@@ -1,0 +1,94 @@
+package dao;
+
+import conexionBD.ConexionBD;
+import modelo.Proyecto;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class ProyectoDAO {
+	private static ConexionBD connBD;
+	
+    public ProyectoDAO(ConexionBD conexionBD) {
+        connBD = conexionBD;
+    }
+    
+    public List<Proyecto> obtenerTodos() {
+        List<Proyecto> lista = new ArrayList<>();
+        String sql = "select * from proyectos order by id_proyecto";
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                lista.add(new Proyecto(
+                        rs.getInt("id_proyecto"),
+                        rs.getString("nombre_proyecto"),
+                        rs.getString("descripcion"),
+                        rs.getDate("fecha_inicio"),
+                        rs.getDate("fecha_fin"),
+                        rs.getString("estado")
+                ));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lista;
+    }
+    
+    public void insertar(Proyecto p) {
+        String sql = "insert into proyectos " +
+                     "(nombre_proyecto, descripcion, fecha_inicio, fecha_fin, estado) " +
+                     "values (?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setString(1, p.getNombreProyecto());
+            ps.setString(2, p.getDescripcion());
+            ps.setDate(3, new Date(p.getFechaInicio().getTime()));
+            ps.setDate(4, new Date(p.getFechaFin().getTime()));
+            ps.setString(5, p.getEstado());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void modificar(Proyecto p) {
+        String sql = "update proyectos set nombre_proyecto = ?, " +
+                     "descripcion = ?, fecha_inicio = ?, " +
+                     "fecha_fin = ?, estado = ? " +
+                     "where id_proyecto = ?";
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setString(1, p.getNombreProyecto());
+            ps.setString(2, p.getDescripcion());
+            ps.setDate(3, new Date(p.getFechaInicio().getTime()));
+            ps.setDate(4, new Date(p.getFechaFin().getTime()));
+            ps.setString(5, p.getEstado());
+            ps.setInt(6, p.getIdProyecto());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void eliminar(int idProyecto) {
+        String sql = "delete from proyectos where id_proyecto = ?";
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ps.setInt(1, idProyecto);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public List<String> obtenerEstados() {
+        List<String> estados = new ArrayList<>();
+        String sql = "select distinct estado from proyectos where estado is not null order by estado";
+        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                estados.add(rs.getString("estado"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return estados;
+    }
+}
