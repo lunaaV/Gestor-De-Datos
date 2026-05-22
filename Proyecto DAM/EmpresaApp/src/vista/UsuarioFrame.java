@@ -61,6 +61,7 @@ public class UsuarioFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 1111, 743);
         setLayout(new BorderLayout());
+        
         initComponents();
 	}
 	
@@ -116,8 +117,7 @@ public class UsuarioFrame extends JFrame {
     }
 	
     // ── HELPERS DE ESTILO ────────────────────────────────────────
-    @SuppressWarnings("serial")
-	private JButton menuBtn(String txt) {
+    private JButton menuBtn(String txt) {
 	    JButton b = new JButton(txt) {
 	        @Override
 	        protected void paintComponent(Graphics g) {
@@ -146,8 +146,7 @@ public class UsuarioFrame extends JFrame {
 	    return b;
 	}
     
-    @SuppressWarnings("serial")
-	private JButton cerrarSesionBtn() {
+    private JButton cerrarSesionBtn() {
 	    JButton b = new JButton("Cerrar sesión") {
 	        @Override
 	        protected void paintComponent(Graphics g) {

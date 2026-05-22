@@ -10,6 +10,7 @@ import java.awt.*;
 import conexionBD.ConexionBD;
 import dao.EmpleadoDAO;
 import vista.admin.*;
+import vista.admin.AsignacionesPanel;
 
 public class AdminFrame extends JFrame {
 	
@@ -104,7 +105,6 @@ public class AdminFrame extends JFrame {
 	}
 	
     // ── HELPERS DE ESTILO ────────────────────────────────────────
-	@SuppressWarnings("serial")
 	private JButton menuBtn(String txt) {
 	    JButton b = new JButton(txt) {
 	        @Override
@@ -134,7 +134,6 @@ public class AdminFrame extends JFrame {
 	    return b;
 	}
 	
-	@SuppressWarnings("serial")
 	private JButton cerrarSesionBtn() {
 	    JButton b = new JButton("Cerrar sesión") {
 	        @Override

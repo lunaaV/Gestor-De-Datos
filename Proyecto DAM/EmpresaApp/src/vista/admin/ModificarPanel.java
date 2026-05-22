@@ -16,6 +16,8 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 import javax.swing.table.*;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.text.SimpleDateFormat;
@@ -23,7 +25,7 @@ import java.util.Date;
 import java.util.List;
 
 public class ModificarPanel extends JPanel {
-
+	
     private static final long serialVersionUID = 1L;
     private EmpleadoDAO empleadoDAO;
     private static ConexionBD conexionBD = new ConexionBD();
@@ -76,8 +78,7 @@ public class ModificarPanel extends JPanel {
         cargarTabla();
     }
     
-    @SuppressWarnings({ "serial" })
-	private void initComponents() {
+    private void initComponents() {
         // ── HEADER ────────────────────────────────────────────────
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(BG);
@@ -335,7 +336,12 @@ public class ModificarPanel extends JPanel {
         
         // ── BOTÓN GUARDAR ─────────────────────────────────────────
         JButton btnGuardar = accentBtn("Guardar cambios");
-        btnGuardar.addActionListener(e -> guardar());
+        btnGuardar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                guardar();
+            }
+        });
         
         JPanel bottom = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 14));
         bottom.setBackground(BG_DARK);
@@ -399,8 +405,7 @@ public class ModificarPanel extends JPanel {
         return f;
     }
     
-    @SuppressWarnings("serial")
-	private JComboBox<String> styledCombo() {
+    private JComboBox<String> styledCombo() {
         JComboBox<String> cb = new JComboBox<String>() {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -468,7 +473,6 @@ public class ModificarPanel extends JPanel {
         return cb;
     }
     
-    @SuppressWarnings("serial")
     private JButton accentBtn(String txt) {
     	JButton b = new JButton(txt) {
     	    @Override
@@ -629,7 +633,7 @@ public class ModificarPanel extends JPanel {
             
             boolean cambioSalario = empleadoSeleccionado.getSalario() != modificado.getSalario();
             boolean cambioPuesto  = empleadoSeleccionado.getIdPuesto() != modificado.getIdPuesto();
-
+            
             if (cambioSalario || cambioPuesto) {
                 HistorialLaboral registro = new HistorialLaboral(
                         0,
@@ -692,21 +696,15 @@ public class ModificarPanel extends JPanel {
         SedeDAO sedeDAO = new SedeDAO(conexionBD);
         
         for (int i = 0; i < depDAO.obtenerTodos().size(); i++) {
-            cbDepartamento.addItem(
-                    depDAO.obtenerTodos().get(i).getNombreDepartamento()
-            );
+            cbDepartamento.addItem(depDAO.obtenerTodos().get(i).getNombreDepartamento());
         }
         
         for (int i = 0; i < pueDAO.obtenerTodos().size(); i++) {
-            cbPuesto.addItem(
-                    pueDAO.obtenerTodos().get(i).getNombrePuesto()
-            );
+            cbPuesto.addItem(pueDAO.obtenerTodos().get(i).getNombrePuesto());
         }
         
         for (int i = 0; i < sedeDAO.obtenerTodos().size(); i++) {
-            cbSede.addItem(
-                    sedeDAO.obtenerTodos().get(i).getNombreSede()
-            );
+            cbSede.addItem(sedeDAO.obtenerTodos().get(i).getNombreSede());
         }
     }
 }

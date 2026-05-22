@@ -15,7 +15,9 @@ public class HistorialLaboralDAO {
     
     public List<HistorialLaboral> obtenerPorEmpleado(int idEmpleado) {
         List<HistorialLaboral> lista = new ArrayList<>();
-        String sql = "select * from historial_laboral where id_empleado = ? order by fecha_cambio desc";
+        String sql = "select h.id_historial, h.id_empleado, h.puesto_anterior, h.puesto_nuevo, " +
+                     "h.salario_anterior, h.salario_nuevo, h.fecha_cambio " +
+                     "from historial_laboral h where h.id_empleado = ? order by h.fecha_cambio desc";
         try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
             ps.setInt(1, idEmpleado);
             ResultSet rs = ps.executeQuery();

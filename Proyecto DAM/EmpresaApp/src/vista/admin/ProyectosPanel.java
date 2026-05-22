@@ -267,7 +267,7 @@ public class ProyectosPanel extends JPanel {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 12));
         panel.setOpaque(false);
         
-        btnNuevo = gradientBtn("Nuevo", BLUE, ACCENT, BLUE_HOV, ACCENT_HOV);
+        btnNuevo = ghostBtn("Limpiar");
         btnGuardar = gradientBtn("Guardar", BLUE, ACCENT, BLUE_HOV, ACCENT_HOV);
         btnModificar = gradientBtn("Modificar", BLUE, ACCENT, BLUE_HOV, ACCENT_HOV);
         btnEliminar = gradientBtn("Eliminar", BLUE, ACCENT, BLUE_HOV, ACCENT_HOV);
@@ -461,6 +461,33 @@ public class ProyectosPanel extends JPanel {
         b.setContentAreaFilled(false);
         b.setCursor(new Cursor(Cursor.HAND_CURSOR));
         b.setBorder(new EmptyBorder(8, 22, 8, 22));
+        return b;
+    }
+    
+    private JButton ghostBtn(String txt) {
+        JButton b = new JButton(txt) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                Color colorFondo;
+                if (getModel().isRollover()) colorFondo = new Color(36, 39, 64);
+                else colorFondo = new Color(0, 0, 0, 0);
+                g2.setColor(colorFondo);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
+                g2.setColor(FIELD_BOR);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        b.setForeground(new Color(130, 145, 200));
+        b.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        b.setFocusPainted(false);
+        b.setBorderPainted(false);
+        b.setContentAreaFilled(false);
+        b.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        b.setBorder(new EmptyBorder(8, 20, 8, 20));
         return b;
     }
     

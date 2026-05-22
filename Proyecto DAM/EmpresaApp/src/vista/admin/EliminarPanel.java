@@ -13,10 +13,10 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 public class EliminarPanel extends JPanel {
-
+	
 	private static final long serialVersionUID = 1L;
     private EmpleadoDAO empleadoDAO;
-
+    
     private JTable table;
     private DefaultTableModel model;
     private List<Empleado> listaEmpleados;
@@ -50,21 +50,20 @@ public class EliminarPanel extends JPanel {
         cargarTabla();
 	}
 	
-	@SuppressWarnings("serial")
 	private void initComponents() {
 		// ── HEADER ──────────────────────────────────────────────
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(BG);
         header.setBorder(new EmptyBorder(22, 28, 18, 28));
- 
+        
         JLabel lblTitulo = new JLabel("Eliminar empleado");
         lblTitulo.setFont(new Font("Serif", Font.BOLD, 22));
         lblTitulo.setForeground(TEXT_TITLE);
- 
+        
         JLabel lblSub = new JLabel("Selecciona un empleado de la tabla y pulsa el botón para eliminarlo");
         lblSub.setFont(new Font("SansSerif", Font.PLAIN, 12));
         lblSub.setForeground(TEXT_SUB);
- 
+        
         JPanel headerText = new JPanel();
         headerText.setLayout(new BoxLayout(headerText, BoxLayout.Y_AXIS));
         headerText.setOpaque(false);
@@ -72,7 +71,7 @@ public class EliminarPanel extends JPanel {
         headerText.add(Box.createVerticalStrut(4));
         headerText.add(lblSub);
         header.add(headerText, BorderLayout.WEST);
- 
+        
         JPanel headerWrap = new JPanel(new BorderLayout());
         headerWrap.setOpaque(false);
         headerWrap.add(header, BorderLayout.CENTER);
@@ -149,7 +148,7 @@ public class EliminarPanel extends JPanel {
         table.setSelectionForeground(TEXT_TITLE);
         table.setIntercellSpacing(new Dimension(0, 1));
         table.setFillsViewportHeight(true);
- 
+        
         JTableHeader tableHeader = table.getTableHeader();
         tableHeader.setBackground(TABLE_HEADER);
         tableHeader.setForeground(TEXT_LABEL);
@@ -157,11 +156,10 @@ public class EliminarPanel extends JPanel {
         tableHeader.setPreferredSize(new Dimension(0, 36));
         tableHeader.setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, FIELD_BOR));
         tableHeader.setReorderingAllowed(false);
- 
+        
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
             @Override
-            public Component getTableCellRendererComponent(JTable tbl, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
+            public Component getTableCellRendererComponent(JTable tbl, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
                 super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, column);
                 setBackground(TABLE_HEADER);
                 setForeground(TEXT_LABEL);
@@ -174,19 +172,19 @@ public class EliminarPanel extends JPanel {
         for (int i = 0; i < table.getColumnCount(); i++) {
             table.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
         }
- 
+        
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBackground(BG);
         scrollPane.getViewport().setBackground(TABLE_ROW);
         scrollPane.setBorder(BorderFactory.createLineBorder(BORDER_C, 1));
         estilizarScrollbar(scrollPane.getVerticalScrollBar());
- 
+        
         JPanel tableWrap = new JPanel(new BorderLayout());
         tableWrap.setBackground(BG);
         tableWrap.setBorder(new EmptyBorder(16, 28, 16, 28));
         tableWrap.add(scrollPane, BorderLayout.CENTER);
         add(tableWrap, BorderLayout.CENTER);
- 
+        
         // ── FOOTER ──────────────────────────────────────────────
         JButton btnEliminar = blueBtn("Eliminar empleado seleccionado");
         btnEliminar.addActionListener(new ActionListener() {
@@ -195,7 +193,7 @@ public class EliminarPanel extends JPanel {
                 eliminar();
             }
         });
- 
+        
         JButton btnRefrescar = ghostBtn("Refrescar");
         btnRefrescar.addActionListener(new ActionListener() {
             @Override
@@ -203,7 +201,7 @@ public class EliminarPanel extends JPanel {
                 cargarTabla();
             }
         });
- 
+        
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 12));
         footer.setBackground(BG_DARK);
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_C));
@@ -220,7 +218,6 @@ public class EliminarPanel extends JPanel {
         return s;
     }
     
-    @SuppressWarnings("serial")
     private JButton blueBtn(String txt) {
         JButton b = new JButton(txt) {
             @Override
@@ -254,8 +251,7 @@ public class EliminarPanel extends JPanel {
         b.setBorder(new EmptyBorder(8, 26, 8, 26));
         return b;
     }
- 
-    @SuppressWarnings("serial")
+    
     private JButton ghostBtn(String txt) {
     	JButton b = new JButton(txt) {
     	    @Override
@@ -266,7 +262,7 @@ public class EliminarPanel extends JPanel {
     	        Color colorFondo;
     	        if (getModel().isRollover()) colorFondo = SURFACE;
     	        else colorFondo = new Color(0, 0, 0, 0);
-
+    	        
     	        g2.setColor(colorFondo);
     	        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
     	        g2.setColor(FIELD_BOR);
@@ -326,7 +322,7 @@ public class EliminarPanel extends JPanel {
             }
         });
     }
-
+    
     // ── LÓGICA ──────────────────────────────────────────────────
     private void eliminar() {
         int fila = table.getSelectedRow();
@@ -345,7 +341,7 @@ public class EliminarPanel extends JPanel {
             cargarTabla();
         }
     }
- 
+    
     private void cargarTabla() {
         model.setRowCount(0);
         listaEmpleados = empleadoDAO.obtenerTodos();

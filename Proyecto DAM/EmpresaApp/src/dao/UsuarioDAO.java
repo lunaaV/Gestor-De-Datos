@@ -48,16 +48,14 @@ public class UsuarioDAO {
         List<Usuario> usuarios = new ArrayList<>();
         String sql = "select u.*, r.nombre_rol as nombre_rol from usuarios u " +
                     "left join roles r on u.rol = r.id_rol order by u.id_usuario desc";
-        
         try (Statement stmt = connBD.getConexion().createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
-            
             while (rs.next()) {
-            	String nombre       = rs.getString("nombre");
-                String email        = rs.getString("email");
-                String password     = rs.getString("password");
-                int rol             = rs.getInt("rol");
-                Usuario usuario     = new Usuario(nombre, email, password, rol);
+            	String nombre = rs.getString("nombre");
+                String email = rs.getString("email");
+                String password = rs.getString("password");
+                int rol = rs.getInt("rol");
+                Usuario usuario = new Usuario(nombre, email, password, rol);
                 usuario.setIdUsuario(rs.getInt("id_usuario"));
                 usuario.setRolNombre(rs.getString("nombre_rol"));
                 usuario.setFechaCreacion(rs.getDate("fecha_creacion"));

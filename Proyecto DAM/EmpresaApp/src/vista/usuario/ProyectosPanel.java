@@ -12,6 +12,8 @@ import javax.swing.event.PopupMenuListener;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import javax.swing.table.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.text.SimpleDateFormat;
@@ -68,7 +70,6 @@ public class ProyectosPanel extends JPanel {
         cargarTabla();
     }
 	
-    @SuppressWarnings("serial")
     private void initComponents() {
         // ── HEADER ──────────────────────────────────────────────
         JPanel header = new JPanel(new BorderLayout());
@@ -110,7 +111,12 @@ public class ProyectosPanel extends JPanel {
         cbEstado = styledCombo(estados.toArray(new String[0]));
         
         JButton btnBuscar = gradientBtn("Buscar");
-        btnBuscar.addActionListener(e -> cargarTabla());
+        btnBuscar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cargarTabla();
+            }
+        });
         
         JPanel filtros = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 12));
         filtros.setBackground(BG_DARK);
@@ -226,7 +232,6 @@ public class ProyectosPanel extends JPanel {
         return f;
     }
     
-    @SuppressWarnings("serial")
     private JComboBox<String> styledCombo(String[] items) {
         JComboBox<String> cb = new JComboBox<String>(items) {
             @Override protected void paintComponent(Graphics g) {
@@ -283,7 +288,6 @@ public class ProyectosPanel extends JPanel {
         return cb;
     }
     
-    @SuppressWarnings("serial")
     private JButton gradientBtn(String txt) {
         JButton b = new JButton(txt) {
         	@Override

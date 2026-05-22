@@ -14,21 +14,21 @@ public class SedeDAO {
 	}
 	
 	public List<Sede> obtenerTodos() {
-        List<Sede> lista = new ArrayList<>();
-        String sql = "select * from sedes";
-        try (Statement st = connBD.getConexion().createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-                Sede s = new Sede(
-                        rs.getInt("id_sede"),
-                        rs.getString("nombre_sede"),
-                        rs.getString("ciudad")
-                );
-                lista.add(s);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return lista;
-    }
+	    List<Sede> lista = new ArrayList<>();
+	    String sql = "select s.id_sede, s.nombre_sede, s.ciudad from sedes s";
+	    try (Statement st = connBD.getConexion().createStatement();
+	         ResultSet rs = st.executeQuery(sql)) {
+	        while (rs.next()) {
+	            Sede s = new Sede(
+	                    rs.getInt("id_sede"),
+	                    rs.getString("nombre_sede"),
+	                    rs.getString("ciudad")
+	            );
+	            lista.add(s);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return lista;
+	}
 }

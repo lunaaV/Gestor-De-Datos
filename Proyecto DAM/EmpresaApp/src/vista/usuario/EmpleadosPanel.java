@@ -70,7 +70,6 @@ public class EmpleadosPanel extends JPanel {
         cargarTabla();
 	}
 	
-    @SuppressWarnings("serial")
     private void initComponents() {
         // ── HEADER ──────────────────────────────────────────────
         JPanel header = new JPanel(new BorderLayout());
@@ -107,7 +106,13 @@ public class EmpleadosPanel extends JPanel {
         cbSede = styledCombo(new String[]{"Todas las sedes"});
         
         JButton btnBuscar = gradientBtn("Buscar");
-        btnBuscar.addActionListener(e -> { pagina = 1; cargarTabla(); });
+        btnBuscar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pagina = 1;
+                cargarTabla();
+            }
+        });
         
         JPanel filtros = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 12));
         filtros.setBackground(BG_DARK);
@@ -287,7 +292,6 @@ public class EmpleadosPanel extends JPanel {
         return f;
     }
     
-    @SuppressWarnings("serial")
     private JComboBox<String> styledCombo(String[] items) {
         JComboBox<String> cb = new JComboBox<String>(items) {
             @Override protected void paintComponent(Graphics g) {
@@ -347,7 +351,6 @@ public class EmpleadosPanel extends JPanel {
         return cb;
     }
     
-    @SuppressWarnings("serial")
     private JButton gradientBtn(String txt) {
         JButton b = new JButton(txt) {
         	@Override
@@ -379,7 +382,6 @@ public class EmpleadosPanel extends JPanel {
         return b;
     }
     
-    @SuppressWarnings("serial")
     private JButton ghostBtn(String txt) {
         JButton b = new JButton(txt) {
         	@Override
@@ -404,7 +406,7 @@ public class EmpleadosPanel extends JPanel {
         b.setBorder(new EmptyBorder(8, 20, 8, 20));
         return b;
     }
-
+    
     private void estilizarScrollbar(JScrollBar bar) {
         bar.setPreferredSize(new Dimension(12, 0));
         bar.setOpaque(false);
@@ -448,7 +450,7 @@ public class EmpleadosPanel extends JPanel {
         List<Empleado> lista = listaCache;
         int inicio = (pagina - 1) * filasPorPagina;
         int contador = 0;
-
+        
         for (Empleado e : lista) {
             boolean coincideBusqueda = false;
             if (busqueda.isEmpty() || e.getNombre().toLowerCase().contains(busqueda)
@@ -496,15 +498,15 @@ public class EmpleadosPanel extends JPanel {
             String dep = e.getDepartamento().getNombreDepartamento();
             if (cbDepartamento.getItemCount() == 1 || !contieneItem(cbDepartamento, dep))
                 cbDepartamento.addItem(dep);
-
+            
             String pue = e.getPuesto().getNombrePuesto();
             if (!contieneItem(cbPuesto, pue)) cbPuesto.addItem(pue);
-
+            
             String sed = e.getSede().getNombreSede();
             if (!contieneItem(cbSede, sed)) cbSede.addItem(sed);
         }
     }
-
+    
     private boolean contieneItem(JComboBox<String> cb, String valor) {
         for (int i = 0; i < cb.getItemCount(); i++)
             if (cb.getItemAt(i).equals(valor)) return true;

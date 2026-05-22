@@ -21,59 +21,120 @@ public class EmpleadoDAO {
 	}
 	
 	public List<Empleado> obtenerTodos() {
-        List<Empleado> empleados = new ArrayList<>();
-        String sql = "select e.*, " +
-                "d.nombre_departamento, d.descripcion AS desc_dep, " +
-                "p.nombre_puesto, p.descripcion AS desc_puesto, " +
-                "s.nombre_sede, s.ciudad " +
-                "from empleados e " +
-                "join departamentos d on e.id_departamento = d.id_departamento " +
-                "join puestos p on e.id_puesto = p.id_puesto " +
-                "join sedes s on e.id_sede = s.id_sede";
-        try (Statement st = connBD.getConexion().createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
-            while (rs.next()) {
-            	Departamento dep = new Departamento(
-            	        rs.getInt("id_departamento"),
-            	        rs.getString("nombre_departamento"),
-            	        rs.getString("desc_dep")
-            	);
-            	Puesto puesto = new Puesto(
-            	        rs.getInt("id_puesto"),
-            	        rs.getString("nombre_puesto"),
-            	        "",
-            	        0
-            	);
-            	Sede sede = new Sede(
-            	        rs.getInt("id_sede"),
-            	        rs.getString("nombre_sede"),
-            	        rs.getString("ciudad")
-            	);
-                Empleado e = new Empleado(
-                        rs.getInt("id_empleado"),
-                        rs.getString("nombre"),
-                        rs.getString("apellido"),
-                        rs.getString("dni"),
-                        rs.getString("email"),
-                        rs.getString("telefono"),
-                        rs.getDate("fecha_nacimiento"),
-                        rs.getDate("fecha_contratacion"),
-                        rs.getDouble("salario"),
-                        rs.getInt("id_departamento"),
-                        rs.getInt("id_puesto"),
-                        rs.getInt("id_sede"),
-                        rs.getBoolean("activo")
-                );
-                e.setDepartamento(dep);
-                e.setPuesto(puesto);
-                e.setSede(sede);
-                empleados.add(e);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return empleados;
-    }
+	    List<Empleado> empleados = new ArrayList<>();
+	    String sql = "select e.id_empleado, e.nombre, e.apellido, e.dni, e.email, e.telefono, " +
+	                 "e.fecha_nacimiento, e.fecha_contratacion, e.salario, " +
+	                 "e.id_departamento, e.id_puesto, e.id_sede, e.activo, " +
+	                 "d.nombre_departamento, d.descripcion AS desc_dep, " +
+	                 "p.nombre_puesto, p.descripcion AS desc_puesto, " +
+	                 "s.nombre_sede, s.ciudad " +
+	                 "from empleados e " +
+	                 "join departamentos d on e.id_departamento = d.id_departamento " +
+	                 "join puestos p on e.id_puesto = p.id_puesto " +
+	                 "join sedes s on e.id_sede = s.id_sede " +
+	                 "order by e.id_empleado asc";
+	    try (Statement st = connBD.getConexion().createStatement();
+	         ResultSet rs = st.executeQuery(sql)) {
+	        while (rs.next()) {
+	            Departamento dep = new Departamento(
+	                    rs.getInt("id_departamento"),
+	                    rs.getString("nombre_departamento"),
+	                    rs.getString("desc_dep")
+	            );
+	            Puesto puesto = new Puesto(
+	                    rs.getInt("id_puesto"),
+	                    rs.getString("nombre_puesto"),
+	                    "",
+	                    0
+	            );
+	            Sede sede = new Sede(
+	                    rs.getInt("id_sede"),
+	                    rs.getString("nombre_sede"),
+	                    rs.getString("ciudad")
+	            );
+	            Empleado e = new Empleado(
+	                    rs.getInt("id_empleado"),
+	                    rs.getString("nombre"),
+	                    rs.getString("apellido"),
+	                    rs.getString("dni"),
+	                    rs.getString("email"),
+	                    rs.getString("telefono"),
+	                    rs.getDate("fecha_nacimiento"),
+	                    rs.getDate("fecha_contratacion"),
+	                    rs.getDouble("salario"),
+	                    rs.getInt("id_departamento"),
+	                    rs.getInt("id_puesto"),
+	                    rs.getInt("id_sede"),
+	                    rs.getBoolean("activo")
+	            );
+	            e.setDepartamento(dep);
+	            e.setPuesto(puesto);
+	            e.setSede(sede);
+	            empleados.add(e);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return empleados;
+	}
+	
+	public List<Empleado> obtenerTodosDesc() {
+	    List<Empleado> empleados = new ArrayList<>();
+	    String sql = "select e.id_empleado, e.nombre, e.apellido, e.dni, e.email, e.telefono, " +
+	                 "e.fecha_nacimiento, e.fecha_contratacion, e.salario, " +
+	                 "e.id_departamento, e.id_puesto, e.id_sede, e.activo, " +
+	                 "d.nombre_departamento, d.descripcion AS desc_dep, " +
+	                 "p.nombre_puesto, p.descripcion AS desc_puesto, " +
+	                 "s.nombre_sede, s.ciudad " +
+	                 "from empleados e " +
+	                 "join departamentos d on e.id_departamento = d.id_departamento " +
+	                 "join puestos p on e.id_puesto = p.id_puesto " +
+	                 "join sedes s on e.id_sede = s.id_sede " +
+	                 "order by e.id_empleado desc";
+	    try (Statement st = connBD.getConexion().createStatement();
+	         ResultSet rs = st.executeQuery(sql)) {
+	        while (rs.next()) {
+	            Departamento dep = new Departamento(
+	                    rs.getInt("id_departamento"),
+	                    rs.getString("nombre_departamento"),
+	                    rs.getString("desc_dep")
+	            );
+	            Puesto puesto = new Puesto(
+	                    rs.getInt("id_puesto"),
+	                    rs.getString("nombre_puesto"),
+	                    "",
+	                    0
+	            );
+	            Sede sede = new Sede(
+	                    rs.getInt("id_sede"),
+	                    rs.getString("nombre_sede"),
+	                    rs.getString("ciudad")
+	            );
+	            Empleado e = new Empleado(
+	                    rs.getInt("id_empleado"),
+	                    rs.getString("nombre"),
+	                    rs.getString("apellido"),
+	                    rs.getString("dni"),
+	                    rs.getString("email"),
+	                    rs.getString("telefono"),
+	                    rs.getDate("fecha_nacimiento"),
+	                    rs.getDate("fecha_contratacion"),
+	                    rs.getDouble("salario"),
+	                    rs.getInt("id_departamento"),
+	                    rs.getInt("id_puesto"),
+	                    rs.getInt("id_sede"),
+	                    rs.getBoolean("activo")
+	            );
+	            e.setDepartamento(dep);
+	            e.setPuesto(puesto);
+	            e.setSede(sede);
+	            empleados.add(e);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return empleados;
+	}
     
     public void insertarEmpleado(Empleado e) {
         String sql = "insert into empleados(nombre, apellido, dni, email, telefono, fecha_nacimiento, fecha_contratacion, salario, id_departamento, id_puesto, id_sede, activo) "
@@ -124,10 +185,18 @@ public class EmpleadoDAO {
     }
     
     public void eliminarEmpleado(int idEmpleado) {
-        String sql = "delete from empleados where id_empleado = ?";
-        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
-            ps.setInt(1, idEmpleado);
-            ps.executeUpdate();
+        String sqlAsignaciones = "delete from empleados_proyectos where id_empleado = ?";
+        String sqlHistorial = "delete from historial_laboral where id_empleado = ?";
+        String sqlEmpleado = "delete from empleados where id_empleado = ?";
+        try (PreparedStatement ps1 = connBD.getConexion().prepareStatement(sqlAsignaciones);
+             PreparedStatement ps2 = connBD.getConexion().prepareStatement(sqlHistorial);
+             PreparedStatement ps3 = connBD.getConexion().prepareStatement(sqlEmpleado)) {
+            ps1.setInt(1, idEmpleado);
+            ps1.executeUpdate();
+            ps2.setInt(1, idEmpleado);
+            ps2.executeUpdate();
+            ps3.setInt(1, idEmpleado);
+            ps3.executeUpdate();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }

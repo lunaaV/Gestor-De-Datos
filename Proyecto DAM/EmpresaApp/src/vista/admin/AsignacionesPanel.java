@@ -282,8 +282,6 @@ public class AsignacionesPanel extends JPanel {
         formFields.add(fieldLabel("Horas:"));
         formFields.add(txtHoras);
         formFields.add(Box.createHorizontalStrut(12));
-        formFields.add(btnAsignar);
-        formFields.add(btnDesasignar);
         
         formCard.add(lblForm, BorderLayout.NORTH);
         formCard.add(formFields, BorderLayout.CENTER);
@@ -300,13 +298,11 @@ public class AsignacionesPanel extends JPanel {
         centro.add(rightPanel, BorderLayout.CENTER);
         
         // ── FOOTER ──────────────────────────────────────────────
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 8));
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 12));
         footer.setBackground(BG_DARK);
         footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_C));
-        JLabel lblFooter = new JLabel("Selecciona un proyecto de la lista para ver sus asignaciones");
-        lblFooter.setFont(new Font("SansSerif", Font.PLAIN, 12));
-        lblFooter.setForeground(TEXT_SUB);
-        footer.add(lblFooter);
+        footer.add(btnAsignar);
+        footer.add(btnDesasignar);
         
         add(headerWrap, BorderLayout.NORTH);
         add(centro, BorderLayout.CENTER);

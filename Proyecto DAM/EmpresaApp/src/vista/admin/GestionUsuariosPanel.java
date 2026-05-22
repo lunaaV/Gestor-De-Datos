@@ -168,8 +168,7 @@ public class GestionUsuariosPanel extends JPanel {
         return panel;
     }
 	
-	@SuppressWarnings("serial")
-    private JPanel crearTablaPanel() {
+	private JPanel crearTablaPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(SURFACE);
         panel.setBorder(BorderFactory.createLineBorder(BORDER_C, 1));
@@ -290,7 +289,6 @@ public class GestionUsuariosPanel extends JPanel {
         return s;
     }
     
-    @SuppressWarnings("serial")
     private JButton blueBtn(String txt) {
         JButton b = new JButton(txt) {
             @Override
@@ -314,17 +312,18 @@ public class GestionUsuariosPanel extends JPanel {
         return b;
     }
     
-    @SuppressWarnings("serial")
     private JButton ghostBtn(String txt) {
         JButton b = new JButton(txt) {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                
                 Color colorFondo;
                 if (getModel().isRollover()) colorFondo = SURFACE;
                 else colorFondo = new Color(0, 0, 0, 0);
                 g2.setColor(colorFondo);
+                
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 10, 10);
                 g2.setColor(FIELD_BOR);
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 10, 10);
@@ -355,10 +354,12 @@ public class GestionUsuariosPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 int barW = 3, x = r.x + (r.width - barW) / 2;
+                
                 Color color;
                 if (isThumbRollover()) color = THUMB_HOV;
                 else color = THUMB_COL;
                 g2.setColor(color);
+                
                 g2.fillRoundRect(x, r.y, barW, r.height, barW, barW);
                 g2.dispose();
             }
@@ -375,7 +376,6 @@ public class GestionUsuariosPanel extends JPanel {
         });
     }
     
-    @SuppressWarnings("serial")
     private JComboBox<String> styledCombo() {
         JComboBox<String> cb = new JComboBox<String>() {
             @Override protected void paintComponent(Graphics g) {

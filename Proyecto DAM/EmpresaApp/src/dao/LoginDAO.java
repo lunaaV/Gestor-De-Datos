@@ -31,7 +31,7 @@ public class LoginDAO {
                 String emailBD = rs.getString("email");
                 String passBD = rs.getString("password");
                 String rolNombre = rs.getString("nombre_rol");
-
+                
                 usuario = new Usuario(nombre, emailBD, passBD, 0);
                 usuario.setIdUsuario(id);
                 usuario.setRolNombre(rolNombre);

@@ -3,12 +3,15 @@ package dialog;
 import javax.swing.*;
 import javax.swing.border.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 public class DialogoErrorLogin extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
+	// ── PALETA ──────────────────────────────────────────────────
 	private static final Color BG_PANEL     = new Color(37, 35, 72);
     private static final Color HEADER_START = new Color(90, 79, 216);
     private static final Color HEADER_END   = new Color(124, 110, 245);
@@ -33,8 +36,7 @@ public class DialogoErrorLogin extends JDialog {
         initComponents(mensaje);
     }
     
-    @SuppressWarnings("serial")
-	private void initComponents(String mensaje) {
+    private void initComponents(String mensaje) {
         RoundedPanel panel = new RoundedPanel(20, BG_PANEL, BORDER_OUTER);
         panel.setLayout(new BorderLayout());
         
@@ -69,7 +71,6 @@ public class DialogoErrorLogin extends JDialog {
                 g2.fillOval(cx - 2, 23, 4, 4);
                 g2.dispose();
             }
-            
             @Override
             public Dimension getPreferredSize() {
             	return new Dimension(36, 36);
@@ -169,7 +170,12 @@ public class DialogoErrorLogin extends JDialog {
         btnAceptar.setBorder(new EmptyBorder(10, 0, 10, 0));
         btnAceptar.setAlignmentX(Component.LEFT_ALIGNMENT);
         btnAceptar.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
-        btnAceptar.addActionListener(e -> dispose());
+        btnAceptar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+            }
+        });
         
         body.add(msgBox);
         body.add(metaRow);

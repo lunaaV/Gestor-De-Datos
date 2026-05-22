@@ -42,8 +42,7 @@ public class RecuperarPasswordPanel extends JPanel {
         initComponents();
 	}
 	
-	@SuppressWarnings("serial")
-    private void initComponents() {
+	private void initComponents() {
         RoundedPanel panel = new RoundedPanel(18);
         panel.setLayout(null);
         panel.setPreferredSize(new Dimension(340, 450));

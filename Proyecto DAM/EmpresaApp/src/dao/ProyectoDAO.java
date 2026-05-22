@@ -15,7 +15,9 @@ public class ProyectoDAO {
     
     public List<Proyecto> obtenerTodos() {
         List<Proyecto> lista = new ArrayList<>();
-        String sql = "select * from proyectos order by id_proyecto";
+        String sql = "select p.id_proyecto, p.nombre_proyecto, p.descripcion, " +
+                     "p.fecha_inicio, p.fecha_fin, p.estado " +
+                     "from proyectos p order by p.id_proyecto";
         try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -69,10 +71,14 @@ public class ProyectoDAO {
     }
     
     public void eliminar(int idProyecto) {
-        String sql = "delete from proyectos where id_proyecto = ?";
-        try (PreparedStatement ps = connBD.getConexion().prepareStatement(sql)) {
-            ps.setInt(1, idProyecto);
-            ps.executeUpdate();
+        String sqlAsignaciones = "delete from empleados_proyectos where id_proyecto = ?";
+        String sqlProyecto = "delete from proyectos where id_proyecto = ?";
+        try (PreparedStatement ps1 = connBD.getConexion().prepareStatement(sqlAsignaciones);
+             PreparedStatement ps2 = connBD.getConexion().prepareStatement(sqlProyecto)) {
+            ps1.setInt(1, idProyecto);
+            ps1.executeUpdate();
+            ps2.setInt(1, idProyecto);
+            ps2.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }

@@ -58,7 +58,6 @@ public class LoginFrame extends JFrame {
 		initComponents();
 	}
 	
-	@SuppressWarnings("serial")
 	private void initComponents() {
 		RoundedPanel panelLogin = new RoundedPanel(18);
         panelLogin.setLayout(null);

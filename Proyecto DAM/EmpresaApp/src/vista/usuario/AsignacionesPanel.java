@@ -2,12 +2,8 @@ package vista.usuario;
 
 import javax.swing.JPanel;
 import conexionBD.ConexionBD;
-import dao.EmpleadoDAO;
 import dao.EmpleadoProyectoDAO;
-import dao.ProyectoDAO;
-import modelo.Empleado;
 import modelo.EmpleadoProyecto;
-import modelo.Proyecto;
 
 import javax.swing.*;
 import javax.swing.border.*;
@@ -23,14 +19,10 @@ import java.awt.event.ActionEvent;
 public class AsignacionesPanel extends JPanel {
 	
 	private static final long serialVersionUID = 1L;
-	private EmpleadoDAO empleadoDAO;
-    private ProyectoDAO proyectoDAO;
     private EmpleadoProyectoDAO epDAO;
     private JTable tabla;
     private DefaultTableModel modelo;
     private JTextField txtBuscar;
-    private List<Empleado> listaEmpleados;
-    private List<Proyecto> listaProyectos;
     
     // ── PALETA ──────────────────────────────────────────────────
     private static final Color BG           = new Color(26, 28, 46);
@@ -59,19 +51,14 @@ public class AsignacionesPanel extends JPanel {
 	 * Create the panel.
 	 */
     public AsignacionesPanel(ConexionBD conexionBD) {
-        this.empleadoDAO = new EmpleadoDAO(conexionBD);
-        this.proyectoDAO = new ProyectoDAO(conexionBD);
-        this.epDAO       = new EmpleadoProyectoDAO(conexionBD);
+        this.epDAO = new EmpleadoProyectoDAO(conexionBD);
         setBackground(BG);
         setLayout(new BorderLayout());
         
-        listaEmpleados = empleadoDAO.obtenerTodos();
-        listaProyectos = proyectoDAO.obtenerTodos();
         initComponents();
         cargarTabla();
     }
 	
-    @SuppressWarnings("serial")
     private void initComponents() {
         // ── HEADER ──────────────────────────────────────────────
         JPanel header = new JPanel(new BorderLayout());
@@ -195,8 +182,18 @@ public class AsignacionesPanel extends JPanel {
         tableWrap.setBorder(new EmptyBorder(16, 28, 16, 28));
         tableWrap.add(scroll, BorderLayout.CENTER);
         
+        // ── FOOTER ──────────────────────────────────────────────
+        JPanel footer = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 8));
+        footer.setBackground(BG_DARK);
+        footer.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_C));
+        JLabel lblFooter = new JLabel("Selecciona un proyecto de la lista para ver sus asignaciones");
+        lblFooter.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        lblFooter.setForeground(TEXT_SUB);
+        footer.add(lblFooter);
+        
         add(north, BorderLayout.NORTH);
         add(tableWrap, BorderLayout.CENTER);
+        add(footer, BorderLayout.SOUTH);
     }
     
     // ── HELPERS DE ESTILO ────────────────────────────────────────
@@ -228,7 +225,6 @@ public class AsignacionesPanel extends JPanel {
         return f;
     }
     
-    @SuppressWarnings("serial")
     private JButton gradientBtn(String txt) {
         JButton b = new JButton(txt) {
         	@Override
@@ -294,30 +290,31 @@ public class AsignacionesPanel extends JPanel {
     // ── LÓGICA ──────────────────────────────────────────────────
     private void cargarTabla() {
         modelo.setRowCount(0);
-        String busqueda = txtBuscar.getText().trim().toLowerCase();
-        List<Empleado> empleados = listaEmpleados;
-        List<Proyecto> proyectos = listaProyectos;
+        String busqueda = txtBuscar.getText().trim();
         
-        for (Proyecto p : proyectos) {
-            for (EmpleadoProyecto ep : epDAO.obtenerPorProyecto(p.getIdProyecto())) {
-                String nombre = "", apellido = "";
-                for (Empleado e : empleados) {
-                    if (e.getIdEmpleado() == ep.getIdEmpleado()) {
-                        nombre = e.getNombre(); apellido = e.getApellido(); break;
+        SwingWorker<List<EmpleadoProyecto>, Void> worker = new SwingWorker<>() {
+            @Override
+            protected List<EmpleadoProyecto> doInBackground() {
+                return epDAO.obtenerAsignacionesFiltradas(busqueda);
+            }
+            @Override
+            protected void done() {
+                try {
+                    for (EmpleadoProyecto ep : get()) {
+                        modelo.addRow(new Object[]{
+                            ep.getIdEmpleado(),
+                            ep.getNombre(),
+                            ep.getApellido(),
+                            ep.getNombreProyecto(),
+                            ep.getRolProyecto(),
+                            ep.getHorasAsignadas()
+                        });
                     }
-                }
-                boolean ok = busqueda.isEmpty()
-                    || nombre.toLowerCase().contains(busqueda)
-                    || apellido.toLowerCase().contains(busqueda)
-                    || p.getNombreProyecto().toLowerCase().contains(busqueda)
-                    || ep.getRolProyecto().toLowerCase().contains(busqueda);
-                if (ok) {
-                    modelo.addRow(new Object[]{
-                        ep.getIdEmpleado(), nombre, apellido,
-                        p.getNombreProyecto(), ep.getRolProyecto(), ep.getHorasAsignadas()
-                    });
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
-        }
+        };
+        worker.execute();
     }
 }

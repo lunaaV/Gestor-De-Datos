@@ -76,8 +76,7 @@ public class ConsultarPanel extends JPanel {
         cargarTabla();
     }
     
-    @SuppressWarnings("serial")
-	private void initComponents() {
+    private void initComponents() {
     	// ── HEADER ──────────────────────────────────────────────
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(BG);
@@ -308,7 +307,6 @@ public class ConsultarPanel extends JPanel {
         return f;
     }
     
-    @SuppressWarnings("serial")
     private JComboBox<String> styledCombo() {
         JComboBox<String> cb = new JComboBox<String>() {
             @Override protected void paintComponent(Graphics g) {
@@ -373,7 +371,6 @@ public class ConsultarPanel extends JPanel {
         return cb;
     }
     
-    @SuppressWarnings("serial")
     private JButton blueBtn(String txt) {
     	JButton b = new JButton(txt) {
     	    @Override
